@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Doações</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <h2>DoeGestão</h2>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="usuarios.html">Usuários</a>
+        <a href="doadores.html">Doadores</a>
+        <a href="doacoes.html">Doações</a>
+        <a href="estoque.html">Estoque</a>
+        <a href="historico.html">Histórico</a>
+        <a href="login.html">Sair</a>
+      </aside>
+
+      <main class="content">
+        <h1>Registrar Doação</h1>
+
+        <div class="form-box">
+          <h2>Nova Doação</h2>
+          <input type="text" placeholder="ID do Doador" />
+          <select>
+            <option>Alimento</option>
+            <option>Roupa</option>
+            <option>Dinheiro</option>
+            <option>Brinquedo</option>
+            <option>Outro</option>
+          </select>
+          <input type="number" placeholder="Quantidade" />
+          <input type="number" placeholder="Valor" />
+          <textarea placeholder="Observação"></textarea>
+          <button>Registrar</button>
+        </div>
+
+        <div class="table-box">
+          <h2>Doações registradas</h2>
+          <table>
+            <tr>
+              <th>Tipo</th>
+              <th>Quantidade</th>
+              <th>Valor</th>
+              <th>Doador</th>
+            </tr>
+            <tr>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+            </tr>
+          </table>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

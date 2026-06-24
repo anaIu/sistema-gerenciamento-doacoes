@@ -1,14 +1,42 @@
-// Consulta os itens disponíveis no estoque
-const listarEstoque = (req, res) => {
-  res.send("Lista de itens em estoque");
+const estoqueModel = require("../models/estoqueModel");
+
+// Lista as movimentações/itens do estoque
+const listarEstoque = async (req, res) => {
+  try {
+    const estoque = await estoqueModel.listarEstoque();
+    res.status(200).json(estoque);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ mensagem: "Erro ao listar estoque", erro: error.message });
+  }
 };
 
-// Registra a saída de um item do estoque
-const registrarSaida = (req, res) => {
-  res.send("Saída de item registrada com sucesso");
+// Registra saída de item do estoque
+const registrarSaida = async (req, res) => {
+  try {
+    const { quantidade, destino, observacao, id_doacao, id_usuario } = req.body;
+
+    const saida = await estoqueModel.registrarSaida(
+      quantidade,
+      destino,
+      observacao,
+      id_doacao,
+      id_usuario,
+    );
+
+    res.status(201).json({
+      mensagem: "Saída registrada com sucesso",
+      movimentacao: saida,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ mensagem: "Erro ao registrar saída", erro: error.message });
+  }
 };
 
 module.exports = {
   listarEstoque,
-  registrarSaida
+  registrarSaida,
 };
