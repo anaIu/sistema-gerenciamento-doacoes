@@ -30,7 +30,29 @@ const cadastrarDoador = async (
   return resultado.rows[0];
 };
 
+// Edita um doador
+const editarDoador = async (id, nome, telefone, email, observacao) => {
+  const resultado = await pool.query(
+    `UPDATE doadores SET nome = $1, telefone = $2, email = $3, observacao = $4
+     WHERE id_doador = $5
+     RETURNING *`,
+    [nome, telefone, email, observacao, id],
+  );
+  return resultado.rows[0];
+};
+
+// Exclui um doador
+const excluirDoador = async (id) => {
+  const resultado = await pool.query(
+    "DELETE FROM doadores WHERE id_doador = $1 RETURNING id_doador",
+    [id],
+  );
+  return resultado.rows[0];
+};
+
 module.exports = {
   listarDoadores,
   cadastrarDoador,
+  editarDoador,
+  excluirDoador,
 };

@@ -15,7 +15,7 @@
         <a href="doacoes.html">Doações</a>
         <a href="estoque.html">Estoque</a>
         <a href="historico.html">Histórico</a>
-        <a href="login.html">Sair</a>
+        <a href="javascript:fazerLogout()">Sair</a>
       </aside>
 
       <main class="content">
@@ -23,31 +23,30 @@
 
         <div class="form-box">
           <h2>Registrar Saída</h2>
-          <input type="text" placeholder="ID da Doação" />
-          <input type="number" placeholder="Quantidade" />
-          <input type="text" placeholder="Destino" />
-          <textarea placeholder="Observação"></textarea>
-          <button>Registrar Saída</button>
+          <input type="text" id="idDoacao" placeholder="ID da Doação" />
+          <input type="number" id="quantidade" placeholder="Quantidade" />
+          <input type="text" id="destino" placeholder="Destino" />
+          <textarea id="observacao" placeholder="Observação"></textarea>
+          <button onclick="registrarSaida()">Registrar Saída</button>
         </div>
 
         <div class="table-box">
           <h2>Movimentações</h2>
           <table>
-            <tr>
-              <th>Tipo</th>
-              <th>Quantidade</th>
-              <th>Destino</th>
-              <th>Data</th>
-            </tr>
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-            </tr>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Destino</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
       </main>
     </div>
+    <script src="js/main.js"></script>
+    <script src="js/estoque.js"></script>
   </body>
 </html>

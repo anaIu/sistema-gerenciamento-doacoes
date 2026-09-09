@@ -15,37 +15,39 @@
         <a href="doacoes.html">Doações</a>
         <a href="estoque.html">Estoque</a>
         <a href="historico.html">Histórico</a>
-        <a href="login.html">Sair</a>
+        <a href="javascript:fazerLogout()">Sair</a>
       </aside>
 
       <main class="content">
         <h1>Gerenciar Doadores</h1>
 
         <div class="form-box">
-          <h2>Novo Doador</h2>
-          <input type="text" placeholder="Nome" />
-          <input type="text" placeholder="Telefone" />
-          <input type="email" placeholder="E-mail" />
-          <textarea placeholder="Observação"></textarea>
-          <button>Cadastrar</button>
+          <h2 id="tituloFormulario">Novo Doador</h2>
+          <input type="text" id="nome" placeholder="Nome" />
+          <input type="text" id="telefone" placeholder="Telefone" />
+          <input type="email" id="email" placeholder="E-mail" />
+          <textarea id="observacao" placeholder="Observação"></textarea>
+          <button onclick="cadastrarDoador()">Cadastrar</button>
+          <button id="botaoCancelar" style="display:none;" onclick="cancelarEdicao()">Cancelar</button>
         </div>
 
         <div class="table-box">
           <h2>Doadores cadastrados</h2>
           <table>
-            <tr>
-              <th>Nome</th>
-              <th>Telefone</th>
-              <th>E-mail</th>
-            </tr>
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-            </tr>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
       </main>
     </div>
+    <script src="js/main.js"></script>
+    <script src="js/doadores.js"></script>
   </body>
 </html>

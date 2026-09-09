@@ -15,7 +15,7 @@
       <a href="doacoes.html">Doações</a>
       <a href="estoque.html">Estoque</a>
       <a href="historico.html">Histórico</a>
-      <a href="login.html">Sair</a>
+      <a href="javascript:fazerLogout()">Sair</a>
     </aside>
 
     <main class="content">
@@ -23,23 +23,21 @@
 
       <div class="table-box">
         <table>
-          <tr>
-            <th>Data</th>
-            <th>Tipo</th>
-            <th>Quantidade</th>
-            <th>Destino</th>
-            <th>Usuário</th>
-          </tr>
-          <tr>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-          </tr>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Quantidade</th>
+              <th>Destino</th>
+              <th>Usuário</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
         </table>
       </div>
     </main>
   </div>
+  <script src="js/main.js"></script>
+  <script src="js/historico.js"></script>
 </body>
 </html>

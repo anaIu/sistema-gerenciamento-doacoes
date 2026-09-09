@@ -3,10 +3,14 @@ const router = express.Router();
 
 const {
   listarUsuarios,
-  cadastrarUsuario
+  cadastrarUsuario,
+  editarUsuario,
+  excluirUsuario
 } = require("../controllers/usuariosController");
 
 router.get("/", listarUsuarios);
 router.post("/", cadastrarUsuario);
+router.put("/:id", editarUsuario);
+router.delete("/:id", excluirUsuario);
 
 module.exports = router;

@@ -15,46 +15,47 @@
         <a href="doacoes.html">Doações</a>
         <a href="estoque.html">Estoque</a>
         <a href="historico.html">Histórico</a>
-        <a href="login.html">Sair</a>
+        <a href="javascript:fazerLogout()">Sair</a>
       </aside>
 
       <main class="content">
         <h1>Registrar Doação</h1>
 
         <div class="form-box">
-          <h2>Nova Doação</h2>
-          <input type="text" placeholder="ID do Doador" />
-          <select>
+          <h2 id="tituloFormulario">Nova Doação</h2>
+          <input type="text" id="idDoador" placeholder="ID do Doador" />
+          <select id="tipo">
             <option>Alimento</option>
             <option>Roupa</option>
             <option>Dinheiro</option>
             <option>Brinquedo</option>
             <option>Outro</option>
           </select>
-          <input type="number" placeholder="Quantidade" />
-          <input type="number" placeholder="Valor" />
-          <textarea placeholder="Observação"></textarea>
-          <button>Registrar</button>
+          <input type="number" id="quantidade" placeholder="Quantidade" />
+          <input type="number" id="valor" placeholder="Valor" />
+          <textarea id="observacao" placeholder="Observação"></textarea>
+          <button onclick="cadastrarDoacao()">Registrar</button>
+          <button id="botaoCancelar" style="display:none;" onclick="cancelarEdicao()">Cancelar</button>
         </div>
 
         <div class="table-box">
           <h2>Doações registradas</h2>
           <table>
-            <tr>
-              <th>Tipo</th>
-              <th>Quantidade</th>
-              <th>Valor</th>
-              <th>Doador</th>
-            </tr>
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-            </tr>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Valor</th>
+                <th>Doador</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
       </main>
     </div>
+    <script src="js/main.js"></script>
+    <script src="js/doacoes.js"></script>
   </body>
 </html>

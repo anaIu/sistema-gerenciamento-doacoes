@@ -15,7 +15,7 @@
         <a href="doacoes.html">Doações</a>
         <a href="estoque.html">Estoque</a>
         <a href="historico.html">Histórico</a>
-        <a href="login.html">Sair</a>
+        <a href="javascript:fazerLogout()">Sair</a>
       </aside>
 
       <main class="content">
@@ -27,43 +27,47 @@
         <div class="cards">
           <div class="card">
             <h3>Usuários</h3>
-            <p>2 cadastrados</p>
+            <p id="totalUsuarios">-</p>
           </div>
 
           <div class="card">
             <h3>Doadores</h3>
-            <p>0 cadastrados</p>
+            <p id="totalDoadores">-</p>
           </div>
 
           <div class="card">
             <h3>Doações</h3>
-            <p>0 registradas</p>
+            <p id="totalDoacoes">-</p>
           </div>
 
           <div class="card">
-            <h3>Estoque</h3>
-            <p>0 itens</p>
+            <h3>Estoque (saldo)</h3>
+            <p id="totalEstoque">-</p>
+          </div>
+
+          <div class="card">
+            <h3>Total Doado</h3>
+            <p id="totalDinheiro">-</p>
           </div>
         </div>
 
         <div class="table-box">
           <h2>Últimas movimentações</h2>
           <table>
-            <tr>
-              <th>Data</th>
-              <th>Tipo</th>
-              <th>Descrição</th>
-              <th>Usuário</th>
-            </tr>
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>Nenhuma movimentação registrada</td>
-              <td>-</td>
-            </tr>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Usuário</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
       </main>
     </div>
+    <script src="js/main.js"></script>
+    <script src="js/dashboard.js"></script>
   </body>
 </html>
