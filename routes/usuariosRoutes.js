@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { somenteAdmin } = require("../middleware/autorizacao");
+
 const {
   listarUsuarios,
   cadastrarUsuario,
@@ -9,8 +11,8 @@ const {
 } = require("../controllers/usuariosController");
 
 router.get("/", listarUsuarios);
-router.post("/", cadastrarUsuario);
-router.put("/:id", editarUsuario);
-router.delete("/:id", excluirUsuario);
+router.post("/", somenteAdmin, cadastrarUsuario);
+router.put("/:id", somenteAdmin, editarUsuario);
+router.delete("/:id", somenteAdmin, excluirUsuario);
 
 module.exports = router;

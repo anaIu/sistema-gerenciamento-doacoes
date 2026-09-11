@@ -4,6 +4,7 @@ const request = require("supertest");
 const app = require("../../app");
 const authModel = require("../../models/authModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 jest.mock("../../models/authModel");
 
@@ -17,6 +18,7 @@ describe("POST /login", () => {
       nome: "Admin",
       email: "admin@teste.com",
       perfil: "Administrador",
+      id_organizacao: 3,
       senha: hash,
     });
 
@@ -27,6 +29,11 @@ describe("POST /login", () => {
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
     expect(res.body.usuario.email).toBe("admin@teste.com");
+    expect(res.body.usuario.id_organizacao).toBe(3);
+
+    const decoded = jwt.verify(res.body.token, "test-secret-key");
+    expect(decoded.id_organizacao).toBe(3);
+    expect(decoded.perfil).toBe("Administrador");
   });
 
   test("retorna 401 para usuario inexistente", async () => {
@@ -43,6 +50,7 @@ describe("POST /login", () => {
       nome: "Admin",
       email: "admin@teste.com",
       perfil: "Administrador",
+      id_organizacao: 3,
       senha: hash,
     });
     const res = await request(app).post("/login").send({ email: "admin@teste.com", senha: "errada" });

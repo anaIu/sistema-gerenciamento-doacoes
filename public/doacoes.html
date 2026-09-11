@@ -7,23 +7,15 @@
   </head>
   <body>
     <div class="container">
-      <aside class="sidebar">
-        <h2>DoeGestão</h2>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="usuarios.html">Usuários</a>
-        <a href="doadores.html">Doadores</a>
-        <a href="doacoes.html">Doações</a>
-        <a href="estoque.html">Estoque</a>
-        <a href="historico.html">Histórico</a>
-        <a href="javascript:fazerLogout()">Sair</a>
-      </aside>
-
       <main class="content">
         <h1>Registrar Doação</h1>
 
         <div class="form-box">
           <h2 id="tituloFormulario">Nova Doação</h2>
-          <input type="text" id="idDoador" placeholder="ID do Doador" />
+          <label for="idDoador">Doador</label>
+          <select id="idDoador">
+            <option value="">Selecione um doador</option>
+          </select>
           <select id="tipo">
             <option>Alimento</option>
             <option>Roupa</option>
@@ -56,6 +48,8 @@
       </main>
     </div>
     <script src="js/main.js"></script>
+    <script src="js/validacoes.js"></script>
+    <script src="js/modal.js"></script>
     <script src="js/doacoes.js"></script>
   </body>
 </html>

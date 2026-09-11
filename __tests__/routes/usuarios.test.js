@@ -22,13 +22,33 @@ describe("rotas /usuarios", () => {
     expect(res.body).toHaveLength(1);
   });
 
-  test("POST cadastra usuario", async () => {
-    usuariosModel.cadastrarUsuario.mockResolvedValue({ id_usuario: 1, nome: "Novo" });
+  test("GET scoping: model recebe usuario logado", async () => {
+    usuariosModel.listarUsuarios.mockResolvedValue([]);
+    await request(app).get("/usuarios").set(headersAuth());
+    expect(usuariosModel.listarUsuarios).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1, perfil: "Administrador", id_organizacao: 1 }),
+    );
+  });
+
+  test("POST cadastra usuario como Funcionario", async () => {
+    usuariosModel.buscarPorEmailParaValidar.mockResolvedValue(undefined);
+    usuariosModel.cadastrarUsuario.mockResolvedValue({ id_usuario: 2, nome: "Novo" });
     const res = await request(app)
       .post("/usuarios")
       .set(headersAuth())
-      .send({ nome: "Novo", email: "n@n.com", senha: "123", perfil: "Funcionário" });
+      .send({ nome: "Novo", email: "n@n.com", senha: "12345678", perfil: "Administrador" });
     expect(res.status).toBe(201);
+    expect(usuariosModel.cadastrarUsuario).toHaveBeenCalledWith(
+      "Novo", "n@n.com", "12345678", "Funcionário", 1,
+    );
+  });
+
+  test("POST com perfil de funcionario retorna 403", async () => {
+    const res = await request(app)
+      .post("/usuarios")
+      .set(headersAuth({ id: 2, perfil: "Funcionário", id_organizacao: 1 }))
+      .send({ nome: "Novo", email: "n@n.com", senha: "12345678", perfil: "Funcionário" });
+    expect(res.status).toBe(403);
   });
 
   test("POST sem campos retorna 400", async () => {
@@ -36,22 +56,42 @@ describe("rotas /usuarios", () => {
     expect(res.status).toBe(400);
   });
 
+  test("POST email invalido retorna 400", async () => {
+    const res = await request(app)
+      .post("/usuarios")
+      .set(headersAuth())
+      .send({ nome: "Novo", email: "invalido", senha: "12345678" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST email em uso retorna 400", async () => {
+    usuariosModel.buscarPorEmailParaValidar.mockResolvedValue({ id_usuario: 9 });
+    const res = await request(app)
+      .post("/usuarios")
+      .set(headersAuth())
+      .send({ nome: "Novo", email: "n@n.com", senha: "12345678" });
+    expect(res.status).toBe(400);
+  });
+
   test("PUT edita usuario", async () => {
     usuariosModel.buscarPorEmailParaValidar.mockResolvedValue(undefined);
-    usuariosModel.editarUsuario.mockResolvedValue({ id_usuario: 1, nome: "Edit" });
+    usuariosModel.editarUsuario.mockResolvedValue({ id_usuario: 2, nome: "Edit" });
     const res = await request(app)
-      .put("/usuarios/1")
+      .put("/usuarios/2")
       .set(headersAuth())
       .send({ nome: "Edit", email: "e@e.com", perfil: "Administrador" });
     expect(res.status).toBe(200);
+    expect(usuariosModel.editarUsuario).toHaveBeenCalledWith(
+      "2", "Edit", "e@e.com", "Funcionário", undefined, 1,
+    );
   });
 
   test("PUT email em uso retorna 400", async () => {
     usuariosModel.buscarPorEmailParaValidar.mockResolvedValue({ id_usuario: 9 });
     const res = await request(app)
-      .put("/usuarios/1")
+      .put("/usuarios/2")
       .set(headersAuth())
-      .send({ nome: "Edit", email: "e@e.com", perfil: "Administrador" });
+      .send({ nome: "Edit", email: "e@e.com" });
     expect(res.status).toBe(400);
   });
 
@@ -59,21 +99,28 @@ describe("rotas /usuarios", () => {
     usuariosModel.buscarPorEmailParaValidar.mockResolvedValue(undefined);
     usuariosModel.editarUsuario.mockResolvedValue(undefined);
     const res = await request(app)
-      .put("/usuarios/1")
+      .put("/usuarios/2")
       .set(headersAuth())
-      .send({ nome: "Edit", email: "e@e.com", perfil: "Administrador" });
+      .send({ nome: "Edit", email: "e@e.com" });
     expect(res.status).toBe(404);
   });
 
   test("DELETE exclui usuario", async () => {
-    usuariosModel.excluirUsuario.mockResolvedValue({ id_usuario: 1 });
-    const res = await request(app).delete("/usuarios/1").set(headersAuth());
+    usuariosModel.excluirUsuario.mockResolvedValue({ id_usuario: 2 });
+    const res = await request(app).delete("/usuarios/2").set(headersAuth());
     expect(res.status).toBe(200);
+    expect(usuariosModel.excluirUsuario).toHaveBeenCalledWith("2", 1);
+  });
+
+  test("DELETE da propria conta retorna 400", async () => {
+    const res = await request(app).delete("/usuarios/1").set(headersAuth());
+    expect(res.status).toBe(400);
+    expect(usuariosModel.excluirUsuario).not.toHaveBeenCalled();
   });
 
   test("DELETE id inexistente retorna 404", async () => {
     usuariosModel.excluirUsuario.mockResolvedValue(undefined);
-    const res = await request(app).delete("/usuarios/1").set(headersAuth());
+    const res = await request(app).delete("/usuarios/2").set(headersAuth());
     expect(res.status).toBe(404);
   });
 
@@ -81,7 +128,7 @@ describe("rotas /usuarios", () => {
     const err = new Error("fk");
     err.code = "23503";
     usuariosModel.excluirUsuario.mockRejectedValue(err);
-    const res = await request(app).delete("/usuarios/1").set(headersAuth());
+    const res = await request(app).delete("/usuarios/2").set(headersAuth());
     expect(res.status).toBe(400);
   });
 

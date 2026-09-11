@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meu Perfil</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <main class="content">
+        <h1>Meu Perfil</h1>
+
+        <div class="form-box" id="infoBox">
+          <h2>Informações</h2>
+          <p><strong>Nome:</strong> <span id="infoNome">-</span></p>
+          <p><strong>E-mail:</strong> <span id="infoEmail">-</span></p>
+          <p><strong>CPF:</strong> <span id="infoCpf">-</span></p>
+          <p><strong>Telefone:</strong> <span id="infoTelefone">-</span></p>
+          <p><strong>Perfil:</strong> <span id="infoPerfil">-</span></p>
+          <p><strong>Organização:</strong> <span id="infoOrganizacao">-</span></p>
+          <p><strong>CNPJ:</strong> <span id="infoCnpj">-</span></p>
+          <button onclick="editarPerfil()">Editar</button>
+        </div>
+
+        <div class="form-box" id="editBox" style="display:none;">
+          <h2>Editar Perfil</h2>
+          <input type="text" id="nome" placeholder="Nome" />
+          <input type="email" id="email" placeholder="E-mail" />
+          <input type="text" id="telefone" placeholder="Telefone" maxlength="15" />
+          <input type="text" id="cpf" placeholder="CPF" maxlength="14" />
+          <button onclick="salvarPerfil()">Salvar</button>
+          <button onclick="cancelarEdicao()">Cancelar</button>
+        </div>
+      </main>
+    </div>
+    <script src="js/main.js"></script>
+    <script src="js/validacoes.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/perfil.js"></script>
+  </body>
+</html>

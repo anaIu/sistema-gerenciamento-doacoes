@@ -6,6 +6,7 @@ module.exports = {
     "models/**/*.js",
     "controllers/**/*.js",
     "middleware/**/*.js",
+    "utils/**/*.js",
     "!**/node_modules/**"
   ],
   coverageThreshold: {

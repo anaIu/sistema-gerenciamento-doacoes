@@ -7,23 +7,15 @@
   </head>
   <body>
     <div class="container">
-      <aside class="sidebar">
-        <h2>DoeGestão</h2>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="usuarios.html">Usuários</a>
-        <a href="doadores.html">Doadores</a>
-        <a href="doacoes.html">Doações</a>
-        <a href="estoque.html">Estoque</a>
-        <a href="historico.html">Histórico</a>
-        <a href="javascript:fazerLogout()">Sair</a>
-      </aside>
-
       <main class="content">
         <h1>Controle de Estoque</h1>
 
         <div class="form-box">
           <h2>Registrar Saída</h2>
-          <input type="text" id="idDoacao" placeholder="ID da Doação" />
+          <label for="idDoacao">Doação</label>
+          <select id="idDoacao">
+            <option value="">Selecione uma doação</option>
+          </select>
           <input type="number" id="quantidade" placeholder="Quantidade" />
           <input type="text" id="destino" placeholder="Destino" />
           <textarea id="observacao" placeholder="Observação"></textarea>
@@ -47,6 +39,8 @@
       </main>
     </div>
     <script src="js/main.js"></script>
+    <script src="js/validacoes.js"></script>
+    <script src="js/modal.js"></script>
     <script src="js/estoque.js"></script>
   </body>
 </html>
