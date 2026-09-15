@@ -1,6 +1,6 @@
 async function fazerLogin() {
   if (window.location.protocol === "file:") {
-    alert(
+    exibirModalErro(
       "Abra o sistema pelo servidor: rode `node server.js` e acesse http://localhost:3000/login.html. Não abra o arquivo direto."
     );
     return;
@@ -10,7 +10,12 @@ async function fazerLogin() {
   const senha = document.getElementById("senha").value;
 
   if (!email || !senha) {
-    alert("Informe e-mail e senha");
+    exibirModalErro("Informe e-mail e senha");
+    return;
+  }
+
+  if (!validarEmail(email)) {
+    exibirModalErro("Informe um e-mail válido");
     return;
   }
 
@@ -28,10 +33,10 @@ async function fazerLogin() {
       localStorage.setItem("usuario", JSON.stringify(dados.usuario));
       window.location.href = "dashboard.html";
     } else {
-      alert(dados.mensagem);
+      exibirModalErro(dados.mensagem || "E-mail ou senha incorretos");
     }
   } catch (erro) {
     console.error("Erro ao fazer login:", erro);
-    alert("Erro ao fazer login. Tente novamente.");
+    exibirModalErro("Erro ao fazer login. Tente novamente.");
   }
 }

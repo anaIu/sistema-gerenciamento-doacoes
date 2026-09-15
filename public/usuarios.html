@@ -7,17 +7,6 @@
   </head>
   <body>
     <div class="container">
-      <aside class="sidebar">
-        <h2>DoeGestão</h2>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="usuarios.html">Usuários</a>
-        <a href="doadores.html">Doadores</a>
-        <a href="doacoes.html">Doações</a>
-        <a href="estoque.html">Estoque</a>
-        <a href="historico.html">Histórico</a>
-        <a href="javascript:fazerLogout()">Sair</a>
-      </aside>
-
       <main class="content">
         <h1>Gerenciar Usuários</h1>
 
@@ -25,11 +14,8 @@
           <h2 id="tituloFormulario">Novo Usuário</h2>
           <input type="text" id="nome" placeholder="Nome" />
           <input type="email" id="email" placeholder="E-mail" />
-          <input type="password" id="senha" placeholder="Senha (opcional ao editar)" />
-          <select id="perfil">
-            <option>Administrador</option>
-            <option>Funcionário</option>
-          </select>
+          <input type="password" id="senha" placeholder="Senha (mínimo 8 caracteres com número)" />
+          <input type="password" id="confirmarSenha" placeholder="Confirmar senha" />
           <button onclick="cadastrarUsuario()">Cadastrar</button>
           <button id="botaoCancelar" style="display:none;" onclick="cancelarEdicao()">Cancelar</button>
         </div>
@@ -51,6 +37,8 @@
       </main>
     </div>
     <script src="js/main.js"></script>
+    <script src="js/validacoes.js"></script>
+    <script src="js/modal.js"></script>
     <script src="js/usuarios.js"></script>
   </body>
 </html>

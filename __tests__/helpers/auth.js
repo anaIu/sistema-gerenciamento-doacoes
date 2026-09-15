@@ -8,7 +8,7 @@ const definirSecret = () => {
 
 const obterToken = (extra = {}) => {
   definirSecret();
-  return jwt.sign({ id: 1, perfil: "Administrador", ...extra }, SECRET);
+  return jwt.sign({ id: 1, perfil: "Administrador", id_organizacao: 1, ...extra }, SECRET);
 };
 
 const headersAuth = (extra = {}) => ({

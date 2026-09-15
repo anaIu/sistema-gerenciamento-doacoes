@@ -1,5 +1,5 @@
 // Importa o dotenv para permitir o uso das variáveis do arquivo .env
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 // Importa o Pool da biblioteca pg, usado para conectar ao PostgreSQL
 const { Pool } = require("pg");
