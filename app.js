@@ -22,7 +22,7 @@ app.use(
         scriptSrcAttr: ["'unsafe-inline'"],
       },
     },
-  })
+  }),
 );
 
 // Configura o servidor para aceitar requisições externas
@@ -52,9 +52,8 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // Rota inicial de teste
 app.get("/", (req, res) => {
-  res.send("Sistema de Gerenciamento de Doações funcionando!");
+  res.sendFile(path.join(__dirname, "public", "login.html"));
 });
-
 // Rotas públicas
 app.use("/login", limitadorLogin, authRoutes);
 app.use("/registro", honeyPot, limitadorRegistro, registroRoutes);
