@@ -1,7 +1,7 @@
 async function fazerLogin() {
   if (window.location.protocol === "file:") {
     exibirModalErro(
-      "Abra o sistema pelo servidor: rode `node server.js` e acesse http://localhost:3000/login.html. Não abra o arquivo direto."
+      "Abra o sistema pelo servidor: rode `node server.js` e acesse http://localhost:3000/login.html. Não abra o arquivo direto.",
     );
     return;
   }
