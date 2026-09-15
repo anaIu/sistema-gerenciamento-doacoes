@@ -1,5 +1,5 @@
 const pool = require("../database/connection");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // Lista usuários conforme o escopo (admin vê a organização; funcionário vê a própria conta)
 const listarUsuarios = async (usuario) => {

@@ -1,5 +1,5 @@
 const pool = require("../database/connection");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const buscarPorEmail = async (email) => {
   const resultado = await pool.query(

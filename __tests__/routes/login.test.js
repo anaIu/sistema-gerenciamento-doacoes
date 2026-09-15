@@ -3,7 +3,7 @@ process.env.JWT_SECRET = "test-secret-key";
 const request = require("supertest");
 const app = require("../../app");
 const authModel = require("../../models/authModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 jest.mock("../../models/authModel");

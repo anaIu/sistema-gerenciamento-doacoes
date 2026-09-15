@@ -1,6 +1,9 @@
 // Importa o Express, usado para criar o servidor
 const express = require("express");
 
+// Importa o path, usado para resolver caminhos de forma robusta (inclusive no Vercel)
+const path = require("path");
+
 // Importa o CORS, que permite comunicação entre front-end e back-end
 const cors = require("cors");
 
@@ -29,7 +32,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve os arquivos estáticos da pasta public
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Importa os middlewares do sistema
 const autenticar = require("./middleware/auth");

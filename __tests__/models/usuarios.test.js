@@ -1,6 +1,6 @@
 const pool = require("../../database/connection");
 const usuariosModel = require("../../models/usuariosModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 jest.mock("../../database/connection");
 
