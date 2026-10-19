@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 jest.mock("../../models/authModel");
+jest.mock("../../models/auditoriaModel");
 
 describe("POST /login", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -61,6 +62,24 @@ describe("POST /login", () => {
     const res = await request(app).post("/login").send({ email: "admin@teste.com" });
     expect(res.status).toBe(400);
     expect(res.body.mensagem).toBe("E-mail e senha são obrigatórios");
+  });
+
+  test("retorna 401 para usuario inativo", async () => {
+    const hash = await bcrypt.hash("SenhaForte123!", 10);
+    authModel.buscarPorEmail.mockResolvedValue({
+      id_usuario: 5,
+      nome: "Inativo",
+      email: "inativo@teste.com",
+      perfil: "Funcionário",
+      id_organizacao: 3,
+      senha: hash,
+      ativo: false,
+    });
+    const res = await request(app)
+      .post("/login")
+      .send({ email: "inativo@teste.com", senha: "SenhaForte123!" });
+    expect(res.status).toBe(401);
+    expect(res.body.mensagem).toContain("inativo");
   });
 
   test("retorna 500 em erro interno", async () => {

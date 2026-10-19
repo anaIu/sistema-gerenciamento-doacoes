@@ -9,7 +9,11 @@ function obterUsuario() {
 
 function obterUsuarioId() {
   const usuario = obterUsuario();
-  return usuario && usuario.id ? usuario.id : 1;
+  if (!usuario || !usuario.id) {
+    window.location.href = "login.html";
+    return null;
+  }
+  return usuario.id;
 }
 
 function verificarAutenticacao() {
@@ -100,7 +104,16 @@ function injetarSidebar() {
   container.prepend(aside);
 }
 
-function fazerLogout() {
+async function fazerLogout() {
+  const token = obterToken();
+  if (token) {
+    try {
+      await fetch("/logout", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+      });
+    } catch (_) {}
+  }
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");
   window.location.href = "login.html";

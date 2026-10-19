@@ -19,7 +19,7 @@
           <p><strong>Perfil:</strong> <span id="infoPerfil">-</span></p>
           <p><strong>Organização:</strong> <span id="infoOrganizacao">-</span></p>
           <p><strong>CNPJ:</strong> <span id="infoCnpj">-</span></p>
-          <button onclick="editarPerfil()">Editar</button>
+          <button id="botaoEditar" type="button">Editar</button>
         </div>
 
         <div class="form-box" id="editBox" style="display:none;">
@@ -28,8 +28,8 @@
           <input type="email" id="email" placeholder="E-mail" />
           <input type="text" id="telefone" placeholder="Telefone" maxlength="15" />
           <input type="text" id="cpf" placeholder="CPF" maxlength="14" />
-          <button onclick="salvarPerfil()">Salvar</button>
-          <button onclick="cancelarEdicao()">Cancelar</button>
+          <button id="botaoSalvarPerfil" type="button">Salvar</button>
+          <button id="botaoCancelarPerfil" type="button">Cancelar</button>
         </div>
       </main>
     </div>

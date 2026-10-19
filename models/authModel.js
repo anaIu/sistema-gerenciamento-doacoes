@@ -75,4 +75,30 @@ const editarPerfil = async (id, { nome, email, cpf, telefone }) => {
   return resultado.rows[0];
 };
 
-module.exports = { buscarPorEmail, registrarOrganizacao, buscarPerfil, editarPerfil };
+const atualizarSenha = async (id, novaSenhaHash) => {
+  const resultado = await pool.query(
+    `UPDATE usuarios
+     SET senha = $1
+     WHERE id_usuario = $2
+     RETURNING id_usuario, nome, email, perfil`,
+    [novaSenhaHash, id],
+  );
+  return resultado.rows[0];
+};
+
+const verificarUsuarioAtivo = async (id, id_organizacao) => {
+  const resultado = await pool.query(
+    "SELECT id_usuario, perfil, id_organizacao FROM usuarios WHERE id_usuario = $1 AND id_organizacao = $2 AND ativo = TRUE",
+    [id, id_organizacao],
+  );
+  return resultado.rows[0];
+};
+
+module.exports = {
+  buscarPorEmail,
+  registrarOrganizacao,
+  buscarPerfil,
+  editarPerfil,
+  atualizarSenha,
+  verificarUsuarioAtivo,
+};

@@ -34,7 +34,7 @@ async function carregarDashboard() {
     corpo.innerHTML = "";
     dados.movimentacoes.forEach((mov) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${formatarData(mov.data_movimentacao)}</td><td>${mov.tipo_doacao}</td><td>${mov.observacao || "-"}</td><td>${mov.usuario_responsavel || "-"}</td>`;
+      tr.innerHTML = `<td>${escaparHTML(formatarData(mov.data_movimentacao))}</td><td>${escaparHTML(mov.tipo_doacao)}</td><td>${escaparHTML(mov.observacao) || "-"}</td><td>${escaparHTML(mov.usuario_responsavel) || "-"}</td>`;
       corpo.appendChild(tr);
     });
   } catch (erro) {

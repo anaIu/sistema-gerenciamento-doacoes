@@ -36,4 +36,11 @@ describe("doadoresModel", () => {
     const resultado = await doadoresModel.excluirDoador(1);
     expect(resultado.id_doador).toBe(1);
   });
+
+  test("buscarDoadorPorId busca doador por id e organizacao", async () => {
+    pool.query.mockResolvedValue({ rows: [{ id_doador: 1, nome: "Doador" }] });
+    const resultado = await doadoresModel.buscarDoadorPorId(1, 10);
+    expect(resultado.id_doador).toBe(1);
+    expect(pool.query.mock.calls[0][1]).toEqual([1, 10]);
+  });
 });

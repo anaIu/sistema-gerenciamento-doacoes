@@ -3,9 +3,11 @@ process.env.JWT_SECRET = "test-secret-key";
 const request = require("supertest");
 const app = require("../../app");
 const usuariosModel = require("../../models/usuariosModel");
+const auditoriaModel = require("../../models/auditoriaModel");
 const { headersAuth } = require("../helpers/auth");
 
 jest.mock("../../models/usuariosModel");
+jest.mock("../../models/auditoriaModel");
 
 describe("rotas /usuarios", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -36,10 +38,10 @@ describe("rotas /usuarios", () => {
     const res = await request(app)
       .post("/usuarios")
       .set(headersAuth())
-      .send({ nome: "Novo", email: "n@n.com", senha: "12345678", perfil: "Administrador" });
+      .send({ nome: "Novo", email: "n@n.com", senha: "SenhaForte123!", perfil: "Administrador" });
     expect(res.status).toBe(201);
     expect(usuariosModel.cadastrarUsuario).toHaveBeenCalledWith(
-      "Novo", "n@n.com", "12345678", "Funcionário", 1,
+      "Novo", "n@n.com", "SenhaForte123!", "Funcionário", 1,
     );
   });
 
@@ -47,7 +49,7 @@ describe("rotas /usuarios", () => {
     const res = await request(app)
       .post("/usuarios")
       .set(headersAuth({ id: 2, perfil: "Funcionário", id_organizacao: 1 }))
-      .send({ nome: "Novo", email: "n@n.com", senha: "12345678", perfil: "Funcionário" });
+      .send({ nome: "Novo", email: "n@n.com", senha: "SenhaForte123!", perfil: "Funcionário" });
     expect(res.status).toBe(403);
   });
 
@@ -60,7 +62,7 @@ describe("rotas /usuarios", () => {
     const res = await request(app)
       .post("/usuarios")
       .set(headersAuth())
-      .send({ nome: "Novo", email: "invalido", senha: "12345678" });
+      .send({ nome: "Novo", email: "invalido", senha: "SenhaForte123!" });
     expect(res.status).toBe(400);
   });
 
@@ -69,8 +71,18 @@ describe("rotas /usuarios", () => {
     const res = await request(app)
       .post("/usuarios")
       .set(headersAuth())
+      .send({ nome: "Novo", email: "n@n.com", senha: "SenhaForte123!" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST senha fraca retorna 400 sem chamar o model", async () => {
+    usuariosModel.buscarPorEmailParaValidar.mockResolvedValue(undefined);
+    const res = await request(app)
+      .post("/usuarios")
+      .set(headersAuth())
       .send({ nome: "Novo", email: "n@n.com", senha: "12345678" });
     expect(res.status).toBe(400);
+    expect(usuariosModel.cadastrarUsuario).not.toHaveBeenCalled();
   });
 
   test("PUT edita usuario", async () => {
@@ -136,5 +148,78 @@ describe("rotas /usuarios", () => {
     usuariosModel.listarUsuarios.mockRejectedValue(new Error("boom"));
     const res = await request(app).get("/usuarios").set(headersAuth());
     expect(res.status).toBe(500);
+  });
+
+  test("POST registra log de auditoria", async () => {
+    usuariosModel.buscarPorEmailParaValidar.mockResolvedValue(undefined);
+    usuariosModel.cadastrarUsuario.mockResolvedValue({ id_usuario: 2, nome: "Novo" });
+    await request(app)
+      .post("/usuarios")
+      .set(headersAuth())
+      .send({ nome: "Novo", email: "n@n.com", senha: "SenhaForte123!" });
+    expect(auditoriaModel.registrarLog).toHaveBeenCalledWith(
+      expect.objectContaining({ acao: "USUARIO_CRIADO", id_organizacao: 1 }),
+    );
+  });
+
+  describe("PATCH /usuarios/:id/ativo", () => {
+    test("desativa usuario como admin", async () => {
+      usuariosModel.alterarAtivo.mockResolvedValue({ id_usuario: 2, ativo: false });
+      const res = await request(app)
+        .patch("/usuarios/2/ativo")
+        .set(headersAuth())
+        .send({ ativo: false });
+      expect(res.status).toBe(200);
+      expect(usuariosModel.alterarAtivo).toHaveBeenCalledWith("2", false, 1);
+      expect(auditoriaModel.registrarLog).toHaveBeenCalledWith(
+        expect.objectContaining({ acao: "USUARIO_DESATIVADO" }),
+      );
+    });
+
+    test("reativa usuario como admin", async () => {
+      usuariosModel.alterarAtivo.mockResolvedValue({ id_usuario: 2, ativo: true });
+      const res = await request(app)
+        .patch("/usuarios/2/ativo")
+        .set(headersAuth())
+        .send({ ativo: true });
+      expect(res.status).toBe(200);
+      expect(auditoriaModel.registrarLog).toHaveBeenCalledWith(
+        expect.objectContaining({ acao: "USUARIO_ATIVADO" }),
+      );
+    });
+
+    test("nao permite desativar a propria conta", async () => {
+      const res = await request(app)
+        .patch("/usuarios/1/ativo")
+        .set(headersAuth())
+        .send({ ativo: false });
+      expect(res.status).toBe(400);
+      expect(usuariosModel.alterarAtivo).not.toHaveBeenCalled();
+    });
+
+    test("valor nao booleano retorna 400", async () => {
+      const res = await request(app)
+        .patch("/usuarios/2/ativo")
+        .set(headersAuth())
+        .send({ ativo: "sim" });
+      expect(res.status).toBe(400);
+    });
+
+    test("usuario de outra org retorna 404", async () => {
+      usuariosModel.alterarAtivo.mockResolvedValue(undefined);
+      const res = await request(app)
+        .patch("/usuarios/99/ativo")
+        .set(headersAuth())
+        .send({ ativo: false });
+      expect(res.status).toBe(404);
+    });
+
+    test("funcionario recebe 403", async () => {
+      const res = await request(app)
+        .patch("/usuarios/2/ativo")
+        .set(headersAuth({ perfil: "Funcionário" }))
+        .send({ ativo: false });
+      expect(res.status).toBe(403);
+    });
   });
 });

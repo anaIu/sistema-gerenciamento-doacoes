@@ -8,10 +8,10 @@ jest.mock("../../models/authModel");
 
 const payloadValido = {
   nome_organizacao: "Casa do Bem",
-  cnpj: "12.345.678/0001-90",
+  cnpj: "12.345.678/0001-95",
   nome: "João Admin",
   email: "joao@bem.com",
-  cpf: "123.456.789-00",
+  cpf: "123.456.789-09",
   telefone: "(11) 99999-9999",
   senha: "SenhaForte123!",
   confirmar_senha: "SenhaForte123!",
@@ -27,7 +27,7 @@ describe("POST /registro", () => {
       email: "joao@bem.com",
       perfil: "Administrador",
       id_organizacao: 5,
-      cpf: "123.456.789-00",
+      cpf: "123.456.789-09",
       telefone: "(11) 99999-9999",
     });
 
@@ -45,6 +45,24 @@ describe("POST /registro", () => {
     expect(authModel.registrarOrganizacao).not.toHaveBeenCalled();
   });
 
+  test("cnpj invalido retorna 400", async () => {
+    const res = await request(app).post("/registro").send({ ...payloadValido, cnpj: "00.000.000/0000-00" });
+    expect(res.status).toBe(400);
+    expect(res.body.mensagem).toBe("CNPJ inválido");
+  });
+
+  test("cpf invalido retorna 400", async () => {
+    const res = await request(app).post("/registro").send({ ...payloadValido, cpf: "111.111.111-11" });
+    expect(res.status).toBe(400);
+    expect(res.body.mensagem).toBe("CPF inválido");
+  });
+
+  test("telefone invalido retorna 400", async () => {
+    const res = await request(app).post("/registro").send({ ...payloadValido, telefone: "123" });
+    expect(res.status).toBe(400);
+    expect(res.body.mensagem).toBe("Telefone inválido");
+  });
+
   test("email invalido retorna 400", async () => {
     const res = await request(app).post("/registro").send({ ...payloadValido, email: "invalido" });
     expect(res.status).toBe(400);
@@ -53,6 +71,14 @@ describe("POST /registro", () => {
   test("senha curta retorna 400", async () => {
     const res = await request(app).post("/registro").send({ ...payloadValido, senha: "123", confirmar_senha: "123" });
     expect(res.status).toBe(400);
+  });
+
+  test("senha fraca (sem maiúscula/minúscula) retorna 400", async () => {
+    const res = await request(app)
+      .post("/registro")
+      .send({ ...payloadValido, senha: "senhafraca1", confirmar_senha: "senhafraca1" });
+    expect(res.status).toBe(400);
+    expect(authModel.registrarOrganizacao).not.toHaveBeenCalled();
   });
 
   test("senhas diferentes retorna 400", async () => {

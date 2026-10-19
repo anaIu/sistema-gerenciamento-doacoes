@@ -6,7 +6,7 @@ const listarUsuarios = async (usuario) => {
   let resultado;
   if (usuario.perfil === "Administrador") {
     resultado = await pool.query(
-      `SELECT id_usuario, nome, email, perfil
+      `SELECT id_usuario, nome, email, perfil, ativo
        FROM usuarios
        WHERE id_organizacao = $1
        ORDER BY id_usuario`,
@@ -14,7 +14,7 @@ const listarUsuarios = async (usuario) => {
     );
   } else {
     resultado = await pool.query(
-      `SELECT id_usuario, nome, email, perfil
+      `SELECT id_usuario, nome, email, perfil, ativo
        FROM usuarios
        WHERE id_usuario = $1`,
       [usuario.id],
@@ -30,7 +30,7 @@ const cadastrarUsuario = async (nome, email, senha, perfil, idOrganizacao) => {
   const resultado = await pool.query(
     `INSERT INTO usuarios (nome, email, senha, perfil, id_organizacao)
      VALUES ($1, $2, $3, $4, $5)
-     RETURNING id_usuario, nome, email, perfil`,
+     RETURNING id_usuario, nome, email, perfil, ativo`,
     [nome, email, senhaCriptografada, perfil, idOrganizacao],
   );
 
@@ -54,14 +54,14 @@ const editarUsuario = async (id, nome, email, perfil, senha, idOrganizacao) => {
     resultado = await pool.query(
       `UPDATE usuarios SET nome = $1, email = $2, perfil = $3, senha = $4
        WHERE id_usuario = $5 AND id_organizacao = $6
-       RETURNING id_usuario, nome, email, perfil`,
+       RETURNING id_usuario, nome, email, perfil, ativo`,
       [nome, email, perfil, senhaCriptografada, id, idOrganizacao],
     );
   } else {
     resultado = await pool.query(
       `UPDATE usuarios SET nome = $1, email = $2, perfil = $3
        WHERE id_usuario = $4 AND id_organizacao = $5
-       RETURNING id_usuario, nome, email, perfil`,
+       RETURNING id_usuario, nome, email, perfil, ativo`,
       [nome, email, perfil, id, idOrganizacao],
     );
   }
@@ -77,10 +77,22 @@ const excluirUsuario = async (id, idOrganizacao) => {
   return resultado.rows[0];
 };
 
+// Ativa/desativa um usuário — apenas dentro da organização
+const alterarAtivo = async (id, ativo, idOrganizacao) => {
+  const resultado = await pool.query(
+    `UPDATE usuarios SET ativo = $1
+     WHERE id_usuario = $2 AND id_organizacao = $3
+     RETURNING id_usuario, nome, email, perfil, ativo`,
+    [ativo, id, idOrganizacao],
+  );
+  return resultado.rows[0];
+};
+
 module.exports = {
   listarUsuarios,
   cadastrarUsuario,
   editarUsuario,
   excluirUsuario,
+  alterarAtivo,
   buscarPorEmailParaValidar,
 };

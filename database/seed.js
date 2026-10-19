@@ -1,7 +1,21 @@
 const bcrypt = require("bcryptjs");
 const pool = require("./connection");
 
+const SENHAS_FRACAS = ["admin123", "senha123", "password", "12345678"];
+
+const validarAmbienteProducao = () => {
+  if (process.env.NODE_ENV !== "production") return;
+  if (!process.env.ADMIN_SENHA || !process.env.ADMIN_EMAIL) {
+    throw new Error("Em produção, ADMIN_SENHA e ADMIN_EMAIL são obrigatórios no ambiente.");
+  }
+  if (process.env.ADMIN_SENHA.length < 8 || SENHAS_FRACAS.includes(process.env.ADMIN_SENHA.toLowerCase())) {
+    throw new Error("ADMIN_SENHA é fraca demais para produção. Defina uma senha forte.");
+  }
+};
+
 const seedAdmin = async () => {
+  validarAmbienteProducao();
+
   const nome = process.env.ADMIN_NOME || "Administrador";
   const email = process.env.ADMIN_EMAIL || "admin@doegestao.local";
   const senha = process.env.ADMIN_SENHA || "admin123";

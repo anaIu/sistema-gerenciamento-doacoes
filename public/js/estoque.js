@@ -54,7 +54,7 @@ function popularTabela(movimentacoes) {
   corpo.innerHTML = "";
   movimentacoes.forEach((movimentacao) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${movimentacao.tipo_doacao}</td><td>${movimentacao.quantidade}</td><td>${movimentacao.destino || "-"}</td><td>${formatarData(movimentacao.data_movimentacao)}</td>`;
+    tr.innerHTML = `<td>${escaparHTML(movimentacao.tipo_doacao)}</td><td>${escaparHTML(movimentacao.quantidade)}</td><td>${escaparHTML(movimentacao.destino) || "-"}</td><td>${escaparHTML(formatarData(movimentacao.data_movimentacao))}</td>`;
     corpo.appendChild(tr);
   });
 }
@@ -75,12 +75,14 @@ async function registrarSaida() {
     return;
   }
 
+  const idUsuario = obterUsuarioId();
+  if (!idUsuario) return;
+
   const movimentacao = {
     quantidade,
     destino,
     observacao,
     id_doacao: idDoacao,
-    id_usuario: obterUsuarioId(),
   };
 
   try {
@@ -112,3 +114,5 @@ async function registrarSaida() {
 
 carregarOpcoesDoacoes();
 carregarMovimentacoes();
+
+document.getElementById("botaoPrincipal").addEventListener("click", registrarSaida);
