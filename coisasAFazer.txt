@@ -1,0 +1,161 @@
+Lista de tarefas para o Trello
+Interface / UX
+0009 - Aumentar o tamanho da tela de login
+Atualmente a tela de login possui um tamanho reduzido, dificultando a visualização e utilização dos elementos.  
+Essa alteração deverá aumentar o tamanho da tela de login, melhorando a visualização e a experiência do usuário.
+
+0010 - Corrigir redirecionamento após cadastro
+Atualmente ao finalizar o cadastro está redirecionando para a tela inicial.  
+Essa alteração deverá corrigir o redirecionamento para a tela de login.
+
+Segurança — Configuração
+0011 - Validar variáveis de ambiente na inicialização
+Atualmente o sistema pode ser iniciado mesmo quando variáveis de ambiente obrigatórias estão ausentes ou possuem valores inseguros.  
+Essa alteração deverá validar as configurações obrigatórias antes da inicialização do servidor.
+
+O relatório especifica principalmente a validação de JWT_SECRET e DATABASE_URL, incluindo tamanho mínimo e rejeição de valores conhecidos/inseguros.     Plano de Ação de Implementação …
+0012 - Corrigir variáveis de ambiente do Docker
+Atualmente as variáveis utilizadas pelo Docker podem não ser obrigatórias durante a inicialização dos serviços.  
+Essa alteração deverá exigir as variáveis necessárias no Docker Compose para impedir a execução do sistema com configurações incompletas.
+
+0013 - Configurar CORS
+Atualmente o sistema não possui uma restrição adequada das origens que podem realizar requisições à API.  
+Essa alteração deverá configurar uma whitelist de origens autorizadas para restringir o acesso à API.
+
+0014 - Ativar conexão TLS com o banco
+Atualmente a conexão com o banco de dados não possui a validação de certificado configurada para o ambiente de produção.  
+Essa alteração deverá ativar rejectUnauthorized: true na conexão PostgreSQL em produção.     Plano de Ação de Implementação …
+
+0015 - Rotacionar chaves e credenciais expostas
+Atualmente existem chaves e credenciais que foram expostas durante o desenvolvimento do sistema.  
+Essa alteração deverá substituir as credenciais expostas por novos valores seguros e atualizar as configurações necessárias.
+
+Multi-tenant
+0016 - Adicionar organização aos doadores
+Atualmente a tabela de doadores não possui o vínculo direto com a organização responsável pelo registro.  
+Essa alteração deverá adicionar o campo id_organizacao à tabela de doadores e realizar o preenchimento dos registros existentes.
+
+0017 - Adicionar organização às doações
+Atualmente a tabela de doações não possui o vínculo direto com a organização responsável pelo registro.  
+Essa alteração deverá adicionar o campo id_organizacao à tabela de doações e realizar o preenchimento dos registros existentes.
+
+0018 - Adicionar organização às movimentações de estoque
+Atualmente a tabela de movimentações de estoque não possui o vínculo direto com a organização responsável pelo registro.  
+Essa alteração deverá adicionar o campo id_organizacao à tabela de movimentações e realizar o preenchimento dos registros existentes.
+
+Essas três alterações fazem parte da migração de isolamento entre organizações descrita no relatório.     Plano de Ação de Implementação …
+0019 - Atualizar schema do banco
+Atualmente o arquivo database/schema.sql não contempla as alterações necessárias para o isolamento das organizações.  
+Essa alteração deverá atualizar o schema com as novas colunas, restrições e índices necessários.
+
+0020 - Filtrar doadores por organização
+Atualmente as consultas de doadores podem retornar registros sem considerar a organização do usuário autenticado.  
+Essa alteração deverá garantir que todas as consultas de doadores sejam filtradas pelo id_organizacao.
+
+0021 - Filtrar doações por organização
+Atualmente as consultas de doações podem retornar registros sem considerar a organização do usuário autenticado.  
+Essa alteração deverá garantir que todas as consultas de doações sejam filtradas pelo id_organizacao.
+
+0022 - Filtrar estoque por organização
+Atualmente as consultas de estoque podem acessar informações sem considerar a organização do usuário autenticado.  
+Essa alteração deverá garantir que as consultas de estoque sejam filtradas pelo id_organizacao.
+
+0023 - Filtrar histórico por organização
+Atualmente as consultas do histórico podem acessar informações sem considerar a organização do usuário autenticado.  
+Essa alteração deverá garantir que as consultas do histórico sejam filtradas pelo id_organizacao.
+
+0024 - Filtrar dashboard por organização
+Atualmente os dados agregados do dashboard podem considerar registros de diferentes organizações.  
+Essa alteração deverá garantir que operações como SUM e COUNT considerem somente os registros da organização do usuário autenticado.
+
+O relatório determina que os models de estoque, histórico e dashboard também recebam e filtrem pelo idOrganizacao.     Plano de Ação de Implementação …
+IDOR / Autoria dos registros
+0025 - Corrigir autoria no cadastro de doadores
+Atualmente o ID do usuário responsável pelo cadastro pode ser enviado pelo corpo da requisição.  
+Essa alteração deverá utilizar exclusivamente o usuário identificado pelo token JWT para definir a autoria do registro.
+
+0026 - Validar organização do doador na criação de doações
+Atualmente uma doação pode receber um id_doador sem verificar se o doador pertence à organização do usuário autenticado.  
+Essa alteração deverá validar a organização do doador antes de permitir o cadastro da doação.
+
+0027 - Validar autoria na edição de doadores
+Atualmente a edição de um doador pode ocorrer sem validar corretamente a organização à qual o registro pertence.  
+Essa alteração deverá validar o id_organizacao antes de permitir a alteração do registro.
+
+0028 - Validar autoria na exclusão de doadores
+Atualmente a exclusão de um doador pode ocorrer sem validar corretamente a organização à qual o registro pertence.  
+Essa alteração deverá validar o id_organizacao antes de permitir a exclusão do registro.
+
+O relatório estabelece que a autoria deve vir exclusivamente do JWT e que a posse do registro deve ser validada antes de alterações ou exclusões.     Plano de Ação de Implementação …
+Proteção contra XSS
+0029 - Criar função de sanitização HTML
+Atualmente dados provenientes do banco podem ser inseridos diretamente no HTML da aplicação.  
+Essa alteração deverá criar uma função escapeHtml() para sanitizar os dados antes da sua renderização.
+
+0030 - Sanitizar dados de usuários
+Atualmente informações de usuários podem ser renderizadas no HTML sem sanitização adequada.  
+Essa alteração deverá aplicar escapeHtml() nos dados exibidos pela tela de usuários.
+
+0031 - Sanitizar dados de doadores
+Atualmente informações de doadores podem ser renderizadas diretamente no HTML.  
+Essa alteração deverá aplicar escapeHtml() nos dados provenientes do banco antes de exibi-los.
+
+0032 - Sanitizar dados de doações
+Atualmente informações de doações podem ser renderizadas diretamente no HTML.  
+Essa alteração deverá aplicar escapeHtml() nos dados provenientes do banco antes de exibi-los.
+
+0033 - Sanitizar dados de estoque
+Atualmente informações de estoque podem ser renderizadas diretamente no HTML.  
+Essa alteração deverá aplicar escapeHtml() nos dados provenientes do banco antes de exibi-los.
+
+0034 - Sanitizar dados do histórico
+Atualmente informações do histórico podem ser renderizadas diretamente no HTML.  
+Essa alteração deverá aplicar escapeHtml() nos dados provenientes do banco antes de exibi-los.
+
+0035 - Sanitizar dados do dashboard
+Atualmente informações do dashboard podem ser renderizadas diretamente no HTML.  
+Essa alteração deverá aplicar escapeHtml() nos dados provenientes do banco antes de exibi-los.
+
+O relatório lista especificamente usuarios.js, doadores.js, doacoes.js, estoque.js, historico.js e dashboard.js como arquivos que precisam receber a sanitização.     Plano de Ação de Implementação …
+CSP
+0036 - Remover unsafe-inline do CSP
+Atualmente a política de segurança de conteúdo permite manipuladores de eventos inline.  
+Essa alteração deverá remover o unsafe-inline e restringir os scripts à origem autorizada.
+
+0037 - Migrar eventos inline para addEventListener
+Atualmente alguns eventos da aplicação podem estar definidos diretamente no HTML.  
+Essa alteração deverá migrar esses eventos para JavaScript utilizando addEventListener.
+
+O relatório indica a utilização de scriptSrc: ["'self'"] e scriptSrcAttr: ["'none'"] no Helmet.     Plano de Ação de Implementação …
+Autenticação
+0038 - Remover fallback de usuário ID 1
+Atualmente o sistema utiliza um ID padrão quando não encontra um usuário autenticado.  
+Essa alteração deverá remover esse fallback e redirecionar o usuário para a tela de login quando não houver autenticação válida.
+
+O relatório aponta especificamente a remoção da atribuição padrão do ID 1.     Plano de Ação de Implementação …
+Interface administrativa
+0039 - Ocultar cadastro de usuários por padrão
+Atualmente o formulário de cadastro de usuários pode ficar disponível independentemente do perfil do usuário.  
+Essa alteração deverá manter o formulário oculto por padrão.
+
+0040 - Exibir cadastro somente para administradores
+Atualmente a interface não restringe adequadamente a exibição do cadastro de usuários ao perfil administrativo.  
+Essa alteração deverá permitir a exibição do formulário somente quando o usuário autenticado possuir o perfil "Administrador".
+
+Essa regra está descrita diretamente no relatório para public/usuarios.html.     Plano de Ação de Implementação …
+Testes e validação
+0041 - Executar testes unitários e de integração
+Atualmente as alterações de segurança precisam ser validadas para garantir que não introduzam novas falhas no sistema.  
+Essa alteração deverá executar a suíte npm test e garantir que os testes sejam aprovados.
+
+0042 - Verificar cobertura dos testes
+Atualmente é necessário verificar se as alterações realizadas estão adequadamente cobertas pelos testes automatizados.  
+Essa alteração deverá executar npm run test:coverage e analisar a cobertura obtida.
+
+0043 - Executar testes End-to-End
+Atualmente é necessário validar o funcionamento do sistema completo após as alterações.  
+Essa alteração deverá executar npm run test:e2e e verificar os principais fluxos da aplicação.
+
+0044 - Validar criação do banco
+Atualmente as alterações do banco precisam ser verificadas em uma instalação limpa.  
+Essa alteração deverá executar npm run db:setup e validar a criação do banco utilizando o novo schema.

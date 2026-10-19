@@ -1,7 +1,7 @@
 const pool = require("../database/connection");
 
-// Lista histórico geral de movimentações
-const listarHistorico = async () => {
+// Lista histórico geral de movimentações da organização
+const listarHistorico = async (id_organizacao) => {
   const resultado = await pool.query(
     `SELECT 
         m.id_movimentacao,
@@ -15,7 +15,9 @@ const listarHistorico = async () => {
      FROM movimentacoes_estoque m
      JOIN doacoes d ON m.id_doacao = d.id_doacao
      JOIN usuarios u ON m.id_usuario = u.id_usuario
+     WHERE u.id_organizacao = $1
      ORDER BY m.data_movimentacao DESC`,
+    [id_organizacao],
   );
 
   return resultado.rows;

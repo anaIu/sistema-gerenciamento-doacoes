@@ -9,7 +9,7 @@ function validarEmail(email) {
 
 function validarSenha(senha) {
   if (typeof senha !== "string") return false;
-  return senha.length >= 8 && /\d/.test(senha);
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(senha);
 }
 
 function validarConfirmacao(senha, confirmarSenha) {
@@ -90,4 +90,14 @@ function aplicarMascara(idCampo, mascara) {
   campo.addEventListener("input", () => {
     campo.value = mascara(campo.value);
   });
+}
+
+function escaparHTML(texto) {
+  if (texto === null || texto === undefined) return "";
+  return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

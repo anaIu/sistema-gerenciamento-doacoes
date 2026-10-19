@@ -22,7 +22,7 @@ async function criarConta() {
   if (!validarEmail(dados.email)) erros.push("Informe um e-mail válido");
   if (!validarCPF(dados.cpf)) erros.push("Informe um CPF válido");
   if (dados.telefone && !validarTelefone(dados.telefone)) erros.push("Informe um telefone válido");
-  if (!validarSenha(dados.senha)) erros.push("A senha deve ter no mínimo 8 caracteres com pelo menos um número");
+  if (!validarSenha(dados.senha)) erros.push("A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula e número");
   if (!validarConfirmacao(dados.senha, dados.confirmar_senha)) erros.push("As senhas não coincidem");
 
   if (erros.length) {
@@ -54,3 +54,5 @@ async function criarConta() {
     exibirModalErro("Erro ao criar conta. Tente novamente.");
   }
 }
+
+document.getElementById("botaoCriarConta").addEventListener("click", criarConta);

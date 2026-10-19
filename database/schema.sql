@@ -50,6 +50,33 @@ CREATE TABLE IF NOT EXISTS organizacoes (
 ALTER TABLE usuarios
   ADD COLUMN IF NOT EXISTS id_organizacao INTEGER REFERENCES organizacoes(id_organizacao),
   ADD COLUMN IF NOT EXISTS cpf VARCHAR(14),
-  ADD COLUMN IF NOT EXISTS telefone VARCHAR(20);
+  ADD COLUMN IF NOT EXISTS telefone VARCHAR(20),
+  ADD COLUMN IF NOT EXISTS ativo BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE INDEX IF NOT EXISTS idx_usuarios_organizacao ON usuarios(id_organizacao);
+
+ALTER TABLE doadores
+  ADD COLUMN IF NOT EXISTS id_organizacao INTEGER REFERENCES organizacoes(id_organizacao);
+
+ALTER TABLE doacoes
+  ADD COLUMN IF NOT EXISTS id_organizacao INTEGER REFERENCES organizacoes(id_organizacao);
+
+ALTER TABLE movimentacoes_estoque
+  ADD COLUMN IF NOT EXISTS id_organizacao INTEGER REFERENCES organizacoes(id_organizacao);
+
+CREATE INDEX IF NOT EXISTS idx_doadores_organizacao ON doadores(id_organizacao);
+CREATE INDEX IF NOT EXISTS idx_doacoes_organizacao ON doacoes(id_organizacao);
+CREATE INDEX IF NOT EXISTS idx_movimentacoes_organizacao ON movimentacoes_estoque(id_organizacao);
+
+CREATE TABLE IF NOT EXISTS logs_auditoria (
+  id_log SERIAL PRIMARY KEY,
+  id_usuario INTEGER REFERENCES usuarios(id_usuario),
+  id_organizacao INTEGER REFERENCES organizacoes(id_organizacao),
+  acao VARCHAR(100) NOT NULL,
+  ip VARCHAR(45),
+  detalhes TEXT,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_logs_auditoria_org ON logs_auditoria(id_organizacao);
+CREATE INDEX IF NOT EXISTS idx_logs_auditoria_data ON logs_auditoria(criado_em);

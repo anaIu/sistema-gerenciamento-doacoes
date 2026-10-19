@@ -1,7 +1,17 @@
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authModel = require("../models/authModel");
-const { validarEmail, validarSenha, validarConfirmacao } = require("../utils/validacoes");
+const auditoriaModel = require("../models/auditoriaModel");
+const { revogarToken } = require("../middleware/auth");
+const {
+  validarEmail,
+  validarSenhaForte,
+  validarConfirmacao,
+  validarTelefone,
+  validarCPF,
+  validarCNPJ,
+} = require("../utils/validacoes");
 
 const gerarToken = (usuario) =>
   jwt.sign(
@@ -21,13 +31,58 @@ const login = async (req, res) => {
     const usuario = await authModel.buscarPorEmail(email);
 
     if (!usuario) {
+      await auditoriaModel.registrarLog({
+        acao: "LOGIN_FALHA",
+        ip: req.ip,
+        detalhes: `Tentativa com email inexistente: ${email}`,
+      });
       return res.status(401).json({ mensagem: "Credenciais inválidas" });
     }
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    let senhaValida = false;
+    const ehBcrypt = usuario.senha && usuario.senha.startsWith("$2");
+
+    if (ehBcrypt) {
+      senhaValida = await bcrypt.compare(senha, usuario.senha);
+    } else if (usuario.senha) {
+      // Suporte a hash legado (MD5 hexadecimal)
+      const hashMd5 = crypto.createHash("md5").update(senha).digest("hex");
+      if (usuario.senha.toLowerCase() === hashMd5.toLowerCase()) {
+        senhaValida = true;
+        // Upgrade automático transparente para bcrypt
+        const novoHashBcrypt = await bcrypt.hash(senha, 10);
+        await authModel.atualizarSenha(usuario.id_usuario, novoHashBcrypt);
+      }
+    }
+
     if (!senhaValida) {
+      await auditoriaModel.registrarLog({
+        id_usuario: usuario.id_usuario,
+        id_organizacao: usuario.id_organizacao,
+        acao: "LOGIN_FALHA",
+        ip: req.ip,
+        detalhes: "Senha incorreta",
+      });
       return res.status(401).json({ mensagem: "Credenciais inválidas" });
     }
+
+    if (usuario.ativo === false) {
+      await auditoriaModel.registrarLog({
+        id_usuario: usuario.id_usuario,
+        id_organizacao: usuario.id_organizacao,
+        acao: "LOGIN_BLOQUEADO",
+        ip: req.ip,
+        detalhes: "Usuário inativo",
+      });
+      return res.status(401).json({ mensagem: "Usuário inativo. Contate um administrador" });
+    }
+
+    await auditoriaModel.registrarLog({
+      id_usuario: usuario.id_usuario,
+      id_organizacao: usuario.id_organizacao,
+      acao: "LOGIN_SUCESSO",
+      ip: req.ip,
+    });
 
     const token = gerarToken(usuario);
 
@@ -44,7 +99,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao fazer login", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao fazer login" });
   }
 };
 
@@ -65,12 +120,26 @@ const registrarOrganizacao = async (req, res) => {
       return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser preenchidos" });
     }
 
+    if (!validarCNPJ(cnpj)) {
+      return res.status(400).json({ mensagem: "CNPJ inválido" });
+    }
+
+    if (cpf && !validarCPF(cpf)) {
+      return res.status(400).json({ mensagem: "CPF inválido" });
+    }
+
+    if (telefone && !validarTelefone(telefone)) {
+      return res.status(400).json({ mensagem: "Telefone inválido" });
+    }
+
     if (!validarEmail(email)) {
       return res.status(400).json({ mensagem: "Formato de e-mail inválido" });
     }
 
-    if (!validarSenha(senha)) {
-      return res.status(400).json({ mensagem: "A senha deve ter pelo menos 8 caracteres" });
+    if (!validarSenhaForte(senha)) {
+      return res
+        .status(400)
+        .json({ mensagem: "A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula e número" });
     }
 
     if (!validarConfirmacao(senha, confirmar_senha)) {
@@ -109,7 +178,7 @@ const registrarOrganizacao = async (req, res) => {
         : "E-mail já cadastrado";
       return res.status(400).json({ mensagem });
     }
-    res.status(500).json({ mensagem: "Erro ao criar conta", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao criar conta" });
   }
 };
 
@@ -137,7 +206,7 @@ const obterPerfil = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao carregar perfil", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao carregar perfil" });
   }
 };
 
@@ -151,6 +220,14 @@ const editarPerfil = async (req, res) => {
 
     if (!validarEmail(email)) {
       return res.status(400).json({ mensagem: "Formato de e-mail inválido" });
+    }
+
+    if (cpf && !validarCPF(cpf)) {
+      return res.status(400).json({ mensagem: "CPF inválido" });
+    }
+
+    if (telefone && !validarTelefone(telefone)) {
+      return res.status(400).json({ mensagem: "Telefone inválido" });
     }
 
     const emailExistente = await authModel.buscarPorEmail(email);
@@ -174,8 +251,31 @@ const editarPerfil = async (req, res) => {
       usuario: usuarioAtualizado,
     });
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao atualizar perfil", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao atualizar perfil" });
   }
 };
 
-module.exports = { login, registrarOrganizacao, obterPerfil, editarPerfil };
+const logout = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.split(" ")[1];
+      revogarToken(token);
+    }
+
+    if (req.usuario) {
+      await auditoriaModel.registrarLog({
+        id_usuario: req.usuario.id,
+        id_organizacao: req.usuario.id_organizacao,
+        acao: "LOGOUT",
+        ip: req.ip,
+      });
+    }
+
+    res.status(200).json({ mensagem: "Logout realizado com sucesso" });
+  } catch (error) {
+    res.status(500).json({ mensagem: "Erro ao realizar logout" });
+  }
+};
+
+module.exports = { login, logout, registrarOrganizacao, obterPerfil, editarPerfil };

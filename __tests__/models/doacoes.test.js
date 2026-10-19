@@ -36,4 +36,11 @@ describe("doacoesModel", () => {
     const resultado = await doacoesModel.excluirDoacao(1);
     expect(resultado.id_doacao).toBe(1);
   });
+
+  test("buscarDoacaoPorId busca doacao por id e organizacao", async () => {
+    pool.query.mockResolvedValue({ rows: [{ id_doacao: 1, tipo: "Roupa" }] });
+    const resultado = await doacoesModel.buscarDoacaoPorId(1, 10);
+    expect(resultado.id_doacao).toBe(1);
+    expect(pool.query.mock.calls[0][1]).toEqual([1, 10]);
+  });
 });

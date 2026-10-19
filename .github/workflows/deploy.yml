@@ -1,0 +1,51 @@
+name: Deploy Automatico via CI/CD
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validacao de Seguranca Pre-Deploy
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      JWT_SECRET: test-secret-key-com-ao-menos-32-caracteres-de-seguranca!
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Executar Testes de Seguranca
+        run: npm run test:seguranca
+
+      - name: Validar Suite Completa
+        run: npm test
+
+  deploy:
+    name: Execucao do Deploy em Producao
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy em Producao via Webhook (Render / Railway / Cloud Provider)
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$DEPLOY_HOOK_URL" ]; then
+            echo "Disparando webhook de deploy em producao..."
+            curl -s -X POST "$DEPLOY_HOOK_URL"
+            echo "Deploy disparado com sucesso!"
+          else
+            echo "DEPLOY_HOOK_URL nao configurada em secrets; deploy local/simulado concluido com sucesso."
+          fi

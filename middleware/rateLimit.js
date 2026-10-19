@@ -1,6 +1,6 @@
 const rateLimit = require("express-rate-limit");
 
-const ativo = process.env.NODE_ENV !== "test";
+const ativo = process.env.NODE_ENV !== "test" || process.env.TESTAR_RATE_LIMIT === "true";
 
 const configurar = (opcoes) => {
   if (!ativo) {
@@ -25,4 +25,12 @@ const limitadorRegistro = configurar({
   message: { mensagem: "Muitas tentativas de cadastro. Tente novamente em alguns minutos." },
 });
 
-module.exports = { limitadorLogin, limitadorRegistro };
+const limitadorGeral = configurar({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { mensagem: "Limite de requisições excedido. Tente novamente mais tarde." },
+});
+
+module.exports = { limitadorLogin, limitadorRegistro, limitadorGeral, configurar };

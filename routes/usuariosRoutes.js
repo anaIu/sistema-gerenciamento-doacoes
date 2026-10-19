@@ -7,12 +7,14 @@ const {
   listarUsuarios,
   cadastrarUsuario,
   editarUsuario,
-  excluirUsuario
+  excluirUsuario,
+  alterarAtivo,
 } = require("../controllers/usuariosController");
 
 router.get("/", listarUsuarios);
 router.post("/", somenteAdmin, cadastrarUsuario);
 router.put("/:id", somenteAdmin, editarUsuario);
+router.patch("/:id/ativo", somenteAdmin, alterarAtivo);
 router.delete("/:id", somenteAdmin, excluirUsuario);
 
 module.exports = router;
