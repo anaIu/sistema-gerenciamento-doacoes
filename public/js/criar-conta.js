@@ -16,14 +16,30 @@ async function criarConta() {
   };
 
   const erros = [];
-  if (!dados.nome_organizacao) erros.push("Informe o nome da organização");
-  if (!validarCNPJ(dados.cnpj)) erros.push("Informe um CNPJ válido");
-  if (!dados.nome) erros.push("Informe o seu nome");
-  if (!validarEmail(dados.email)) erros.push("Informe um e-mail válido");
-  if (!validarCPF(dados.cpf)) erros.push("Informe um CPF válido");
-  if (dados.telefone && !validarTelefone(dados.telefone)) erros.push("Informe um telefone válido");
-  if (!validarSenha(dados.senha)) erros.push("A senha deve ter no mínimo 8 caracteres com pelo menos um número");
-  if (!validarConfirmacao(dados.senha, dados.confirmar_senha)) erros.push("As senhas não coincidem");
+
+  if (!dados.nome_organizacao)
+    erros.push("Informe o nome da organização");
+
+  if (!validarCNPJ(dados.cnpj))
+    erros.push("Informe um CNPJ válido");
+
+  if (!dados.nome)
+    erros.push("Informe o seu nome");
+
+  if (!validarEmail(dados.email))
+    erros.push("Informe um e-mail válido");
+
+  if (!validarCPF(dados.cpf))
+    erros.push("Informe um CPF válido");
+
+  if (dados.telefone && !validarTelefone(dados.telefone))
+    erros.push("Informe um telefone válido");
+
+  if (!validarSenha(dados.senha))
+    erros.push("A senha deve ter no mínimo 8 caracteres com pelo menos um número");
+
+  if (!validarConfirmacao(dados.senha, dados.confirmar_senha))
+    erros.push("As senhas não coincidem");
 
   if (erros.length) {
     exibirModalErro(erros);
@@ -33,24 +49,39 @@ async function criarConta() {
   try {
     const resposta = await fetch("/registro", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(dados),
     });
 
     const retorno = await resposta.json();
 
     if (resposta.ok) {
-      localStorage.setItem("token", retorno.token);
-      localStorage.setItem("usuario", JSON.stringify(retorno.usuario));
-      exibirModalSucesso(retorno.mensagem);
+      // Remove qualquer autenticação anterior
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+
+      // Informa que o cadastro foi realizado
+      exibirModalSucesso(
+        "Conta criada com sucesso! Redirecionando para o login..."
+      );
+
+      // Redireciona para a tela de login após 1,2 segundo
       setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = "login.html";
       }, 1200);
+
     } else {
-      exibirModalErro(retorno.mensagem || "Não foi possível criar a conta");
+      exibirModalErro(
+        retorno.mensagem || "Não foi possível criar a conta"
+      );
     }
+
   } catch (erro) {
     console.error("Erro ao criar conta:", erro);
-    exibirModalErro("Erro ao criar conta. Tente novamente.");
+    exibirModalErro(
+      "Erro ao criar conta. Tente novamente."
+    );
   }
 }
