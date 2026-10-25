@@ -1,3 +1,4 @@
+
 verificarAutenticacao();
 
 let doacaoEditandoId = null;
@@ -15,6 +16,7 @@ async function carregarDoadores() {
     doadoresLocais = await resposta.json();
     const select = document.getElementById("idDoador");
     select.innerHTML = '<option value="">Selecione um doador</option>';
+
     doadoresLocais.forEach((doador) => {
       const op = document.createElement("option");
       op.value = doador.id_doador;
@@ -48,6 +50,7 @@ async function carregarDoacoes() {
 
 function formatarValor(valor) {
   if (valor === null || valor === undefined || valor === "") return "-";
+
   return Number(valor).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -57,9 +60,11 @@ function formatarValor(valor) {
 function popularTabela(doacoes) {
   const corpo = document.querySelector("table tbody");
   corpo.innerHTML = "";
+
   doacoes.forEach((doacao) => {
     const tr = document.createElement("tr");
     const idDoacao = Number(doacao.id_doacao);
+
     tr.innerHTML = `
       <td>${escaparHTML(doacao.tipo)}</td>
       <td>${escaparHTML(doacao.quantidade) || "-"}</td>
@@ -69,6 +74,7 @@ function popularTabela(doacoes) {
         <button type="button" data-acao="editar" data-id="${idDoacao}">Editar</button>
         <button type="button" data-acao="excluir" data-id="${idDoacao}">Excluir</button>
       </td>`;
+
     corpo.appendChild(tr);
   });
 }
@@ -78,37 +84,48 @@ function editarDoacao(id) {
   if (!alvo) return;
 
   doacaoEditandoId = id;
+
   const selectDoador = document.getElementById("idDoador");
   const existeOpcao = Array.from(selectDoador.options).some(
     (op) => op.value === String(alvo.id_doador)
   );
+
   if (!existeOpcao && alvo.id_doador) {
     const op = document.createElement("option");
     op.value = alvo.id_doador;
     op.textContent = `${alvo.id_doador} — ${alvo.nome_doador || "Doador"}`;
     selectDoador.appendChild(op);
   }
+
   selectDoador.value = alvo.id_doador || "";
+
   document.getElementById("tipo").value = alvo.tipo;
   document.getElementById("quantidade").value = alvo.quantidade || "";
   document.getElementById("valor").value = alvo.valor || "";
   document.getElementById("observacao").value = alvo.observacao || "";
+
   document.getElementById("tituloFormulario").textContent = "Editar Doação";
+
   const botao = document.getElementById("botaoPrincipal");
   botao.textContent = "Salvar";
+
   document.getElementById("botaoCancelar").style.display = "inline-block";
 }
 
 function cancelarEdicao() {
   doacaoEditandoId = null;
+
   document.getElementById("idDoador").value = "";
   document.getElementById("tipo").value = "Alimento";
   document.getElementById("quantidade").value = "";
   document.getElementById("valor").value = "";
   document.getElementById("observacao").value = "";
+
   document.getElementById("tituloFormulario").textContent = "Nova Doação";
+
   const botao = document.getElementById("botaoPrincipal");
   botao.textContent = "Registrar";
+
   document.getElementById("botaoCancelar").style.display = "none";
 }
 
@@ -117,17 +134,22 @@ function validarFormularioDoacao() {
   const quantidade = document.getElementById("quantidade").value;
   const valor = document.getElementById("valor").value;
   const idDoador = document.getElementById("idDoador").value;
+
   const erros = [];
 
   if (!idDoador) erros.push("Selecione um doador");
   if (!tipo) erros.push("Selecione o tipo da doação");
+
   if (tipo === "Dinheiro") {
-    if (valor === "" || Number(valor) <= 0) erros.push("Doações de dinheiro devem ter valor informado");
+    if (valor === "" || Number(valor) <= 0) {
+      erros.push("Doações de dinheiro devem ter valor informado");
+    }
   } else if (quantidade === "" || Number(quantidade) <= 0) {
     erros.push("Doações de itens devem ter quantidade informada");
   }
 
   if (erros.length) exibirModalErro(erros);
+
   return erros.length === 0;
 }
 
@@ -168,26 +190,31 @@ async function salvarDoacao() {
 }
 
 function excluirDoacao(id) {
-  exibirModalConfirmacao("Tem certeza que deseja excluir esta doação?", async () => {
-    try {
-      const resposta = await fetch(`/doacoes/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${obterToken()}` },
-      });
+  exibirModalConfirmacao(
+    "Tem certeza que deseja excluir esta doação?",
+    async () => {
+      try {
+        const resposta = await fetch(`/doacoes/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${obterToken()}`,
+          },
+        });
 
-      const dados = await resposta.json();
+        const dados = await resposta.json();
 
-      if (resposta.ok) {
-        exibirModalSucesso(dados.mensagem);
-        carregarDoacoes();
-      } else {
-        exibirModalErro(dados.mensagem);
+        if (resposta.ok) {
+          exibirModalSucesso(dados.mensagem);
+          carregarDoacoes();
+        } else {
+          exibirModalErro(dados.mensagem);
+        }
+      } catch (erro) {
+        console.error(erro);
+        exibirModalErro("Erro ao excluir doação.");
       }
-    } catch (erro) {
-      console.error(erro);
-      exibirModalErro("Erro ao excluir doação.");
     }
-  });
+  );
 }
 
 carregarDoadores();
@@ -234,20 +261,33 @@ async function cadastrarDoacao() {
   }
 }
 
+// Solicita confirmação somente ao editar uma doação.
 document.getElementById("botaoPrincipal").addEventListener("click", () => {
-  if (doacaoEditandoId) {
-    salvarDoacao();
+  if (doacaoEditandoId !== null) {
+    if (!validarFormularioDoacao()) return;
+
+    exibirModalConfirmacao(
+      "Tem certeza que deseja salvar as alterações desta doação?",
+      () => salvarDoacao()
+    );
   } else {
     cadastrarDoacao();
   }
 });
 
-document.getElementById("botaoCancelar").addEventListener("click", cancelarEdicao);
+document
+  .getElementById("botaoCancelar")
+  .addEventListener("click", cancelarEdicao);
 
 document.querySelector("table tbody").addEventListener("click", (evento) => {
   const botao = evento.target.closest("button[data-acao]");
   if (!botao) return;
+
   const id = Number(botao.dataset.id);
-  if (botao.dataset.acao === "editar") editarDoacao(id);
-  else if (botao.dataset.acao === "excluir") excluirDoacao(id);
+
+  if (botao.dataset.acao === "editar") {
+    editarDoacao(id);
+  } else if (botao.dataset.acao === "excluir") {
+    excluirDoacao(id);
+  }
 });
