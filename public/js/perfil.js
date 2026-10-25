@@ -95,4 +95,8 @@ async function salvarPerfil() {
   }
 }
 
+document.getElementById("botaoEditar").addEventListener("click", editarPerfil);
+document.getElementById("botaoSalvarPerfil").addEventListener("click", salvarPerfil);
+document.getElementById("botaoCancelarPerfil").addEventListener("click", cancelarEdicao);
+
 carregarPerfil();

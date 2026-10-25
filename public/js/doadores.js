@@ -29,13 +29,14 @@ function popularTabela(doadores) {
   corpo.innerHTML = "";
   doadores.forEach((doador) => {
     const tr = document.createElement("tr");
+    const idDoador = Number(doador.id_doador);
     tr.innerHTML = `
-      <td>${doador.nome}</td>
-      <td>${mascaraTelefone(doador.telefone) || "-"}</td>
-      <td>${doador.email || "-"}</td>
+      <td>${escaparHTML(doador.nome)}</td>
+      <td>${escaparHTML(mascaraTelefone(doador.telefone)) || "-"}</td>
+      <td>${escaparHTML(doador.email) || "-"}</td>
       <td>
-        <button onclick="editarDoador(${doador.id_doador})">Editar</button>
-        <button onclick="excluirDoador(${doador.id_doador})">Excluir</button>
+        <button type="button" data-acao="editar" data-id="${idDoador}">Editar</button>
+        <button type="button" data-acao="excluir" data-id="${idDoador}">Excluir</button>
       </td>`;
     corpo.appendChild(tr);
   });
@@ -51,9 +52,8 @@ function editarDoador(id) {
   document.getElementById("email").value = alvo.email || "";
   document.getElementById("observacao").value = alvo.observacao || "";
   document.getElementById("tituloFormulario").textContent = "Editar Doador";
-  const botao = document.querySelector(".form-box button");
+  const botao = document.getElementById("botaoPrincipal");
   botao.textContent = "Salvar";
-  botao.setAttribute("onclick", "salvarDoador()");
   document.getElementById("botaoCancelar").style.display = "inline-block";
 }
 
@@ -64,9 +64,8 @@ function cancelarEdicao() {
   document.getElementById("email").value = "";
   document.getElementById("observacao").value = "";
   document.getElementById("tituloFormulario").textContent = "Novo Doador";
-  const botao = document.querySelector(".form-box button");
+  const botao = document.getElementById("botaoPrincipal");
   botao.textContent = "Cadastrar";
-  botao.setAttribute("onclick", "cadastrarDoador()");
   document.getElementById("botaoCancelar").style.display = "none";
 }
 
@@ -147,12 +146,14 @@ carregarDoadores();
 async function cadastrarDoador() {
   if (!validarFormularioDoador()) return;
 
+  const idUsuario = obterUsuarioId();
+  if (!idUsuario) return;
+
   const doador = {
     nome: document.getElementById("nome").value,
     telefone: document.getElementById("telefone").value,
     email: document.getElementById("email").value,
     observacao: document.getElementById("observacao").value,
-    id_usuario_cadastro: obterUsuarioId(),
   };
 
   try {
@@ -179,3 +180,21 @@ async function cadastrarDoador() {
     exibirModalErro("Erro ao cadastrar doador.");
   }
 }
+
+document.getElementById("botaoPrincipal").addEventListener("click", () => {
+  if (doadorEditandoId) {
+    salvarDoador();
+  } else {
+    cadastrarDoador();
+  }
+});
+
+document.getElementById("botaoCancelar").addEventListener("click", cancelarEdicao);
+
+document.querySelector("table tbody").addEventListener("click", (evento) => {
+  const botao = evento.target.closest("button[data-acao]");
+  if (!botao) return;
+  const id = Number(botao.dataset.id);
+  if (botao.dataset.acao === "editar") editarDoador(id);
+  else if (botao.dataset.acao === "excluir") excluirDoador(id);
+});

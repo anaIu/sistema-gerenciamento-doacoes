@@ -23,4 +23,19 @@ describe("estoqueModel", () => {
     expect(pool.query.mock.calls[0][1][0]).toBe(2);
     expect(resultado.tipo_movimentacao).toBe("Saída");
   });
+
+  test("buscarDoacaoComSaldo retorna doacao e calcula saldo", async () => {
+    pool.query.mockResolvedValue({
+      rows: [{ id_doacao: 1, tipo: "Roupa", quantidade: 10, total_saidas: 4 }],
+    });
+    const resultado = await estoqueModel.buscarDoacaoComSaldo(1, 10);
+    expect(resultado.saldo).toBe(6);
+    expect(pool.query.mock.calls[0][1]).toEqual([1, 10]);
+  });
+
+  test("buscarDoacaoComSaldo retorna null quando nao encontrada", async () => {
+    pool.query.mockResolvedValue({ rows: [] });
+    const resultado = await estoqueModel.buscarDoacaoComSaldo(99, 10);
+    expect(resultado).toBeNull();
+  });
 });

@@ -98,4 +98,21 @@ describe("models/authModel", () => {
     const resultado = await authModel.editarPerfil(99, { nome: "X", email: "x@x.com" });
     expect(resultado).toBeUndefined();
   });
+
+  test("atualizarSenha atualiza a senha do usuario", async () => {
+    pool.query.mockResolvedValue({
+      rows: [{ id_usuario: 1, nome: "Admin", email: "a@a.com", perfil: "Administrador" }],
+    });
+    const resultado = await authModel.atualizarSenha(1, "$2a$10$hash");
+    expect(resultado.id_usuario).toBe(1);
+    expect(pool.query.mock.calls[0][1]).toEqual(["$2a$10$hash", 1]);
+  });
+
+  test("verificarUsuarioAtivo exige usuario ativo na organizacao", async () => {
+    pool.query.mockResolvedValue({ rows: [{ id_usuario: 1, perfil: "Administrador", id_organizacao: 3 }] });
+    const resultado = await authModel.verificarUsuarioAtivo(1, 3);
+    expect(resultado.id_usuario).toBe(1);
+    expect(pool.query.mock.calls[0][0]).toContain("ativo = TRUE");
+    expect(pool.query.mock.calls[0][1]).toEqual([1, 3]);
+  });
 });

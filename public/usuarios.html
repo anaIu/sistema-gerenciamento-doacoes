@@ -14,10 +14,10 @@
           <h2 id="tituloFormulario">Novo Usuário</h2>
           <input type="text" id="nome" placeholder="Nome" />
           <input type="email" id="email" placeholder="E-mail" />
-          <input type="password" id="senha" placeholder="Senha (mínimo 8 caracteres com número)" />
+          <input type="password" id="senha" placeholder="Senha (mínimo 8, com maiúscula, minúscula e número)" />
           <input type="password" id="confirmarSenha" placeholder="Confirmar senha" />
-          <button onclick="cadastrarUsuario()">Cadastrar</button>
-          <button id="botaoCancelar" style="display:none;" onclick="cancelarEdicao()">Cancelar</button>
+          <button id="botaoPrincipal" type="button">Cadastrar</button>
+          <button id="botaoCancelar" type="button" style="display:none;">Cancelar</button>
         </div>
 
         <div class="table-box">
@@ -28,6 +28,7 @@
                 <th>Nome</th>
                 <th>E-mail</th>
                 <th>Perfil</th>
+                <th>Status</th>
                 <th>Ações</th>
               </tr>
             </thead>

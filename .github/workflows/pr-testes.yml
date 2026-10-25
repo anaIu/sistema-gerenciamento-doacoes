@@ -1,0 +1,32 @@
+name: Testes de Seguranca no Pull Request
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  security-tests:
+    name: Testes de Seguranca (IDOR, Criptografia, Injecao, Bots)
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      JWT_SECRET: test-secret-key-com-ao-menos-32-caracteres-de-seguranca!
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Executar Testes de Seguranca (4 Pilares)
+        run: npm run test:seguranca
+
+      - name: Executar Suite Completa com Cobertura
+        run: npm run test:coverage

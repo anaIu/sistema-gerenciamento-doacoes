@@ -1,3 +1,4 @@
+
 aplicarMascara("cnpj", mascaraCnpj);
 aplicarMascara("cpf", mascaraCpf);
 aplicarMascara("telefone", mascaraTelefone);
@@ -36,7 +37,7 @@ async function criarConta() {
     erros.push("Informe um telefone válido");
 
   if (!validarSenha(dados.senha))
-    erros.push("A senha deve ter no mínimo 8 caracteres com pelo menos um número");
+    erros.push("A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula e número");
 
   if (!validarConfirmacao(dados.senha, dados.confirmar_senha))
     erros.push("As senhas não coincidem");
@@ -67,7 +68,7 @@ async function criarConta() {
         "Conta criada com sucesso! Redirecionando para o login..."
       );
 
-      // Redireciona para a tela de login após 1,2 segundo
+      // Redireciona para a tela de login
       setTimeout(() => {
         window.location.href = "login.html";
       }, 1200);
@@ -85,3 +86,6 @@ async function criarConta() {
     );
   }
 }
+
+// Evento de clique adicionado na atualização da develop
+document.getElementById("botaoCriarConta").addEventListener("click", criarConta);

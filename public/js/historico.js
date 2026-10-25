@@ -22,7 +22,7 @@ function popularTabela(registros) {
   corpo.innerHTML = "";
   registros.forEach((registro) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${formatarData(registro.data_movimentacao)}</td><td>${registro.tipo_doacao}</td><td>${registro.quantidade || "-"}</td><td>${registro.destino || "-"}</td><td>${registro.usuario_responsavel || "-"}</td>`;
+    tr.innerHTML = `<td>${escaparHTML(formatarData(registro.data_movimentacao))}</td><td>${escaparHTML(registro.tipo_doacao)}</td><td>${escaparHTML(registro.quantidade) || "-"}</td><td>${escaparHTML(registro.destino) || "-"}</td><td>${escaparHTML(registro.usuario_responsavel) || "-"}</td>`;
     corpo.appendChild(tr);
   });
 }

@@ -6,6 +6,7 @@ const doadoresModel = require("../../models/doadoresModel");
 const { headersAuth } = require("../helpers/auth");
 
 jest.mock("../../models/doadoresModel");
+jest.mock("../../models/auditoriaModel");
 
 describe("rotas /doadores", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -27,8 +28,32 @@ describe("rotas /doadores", () => {
     const res = await request(app)
       .post("/doadores")
       .set(headersAuth())
-      .send({ nome: "D", telefone: "99", email: "d@d.com", observacao: "", id_usuario_cadastro: 1 });
+      .send({ nome: "D", telefone: "(11) 99999-9999", email: "d@d.com", observacao: "", id_usuario_cadastro: 1 });
     expect(res.status).toBe(201);
+  });
+
+  test("POST sem nome retorna 400", async () => {
+    const res = await request(app)
+      .post("/doadores")
+      .set(headersAuth())
+      .send({ email: "d@d.com" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST email invalido retorna 400", async () => {
+    const res = await request(app)
+      .post("/doadores")
+      .set(headersAuth())
+      .send({ nome: "D", email: "invalido" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST telefone invalido retorna 400", async () => {
+    const res = await request(app)
+      .post("/doadores")
+      .set(headersAuth())
+      .send({ nome: "D", telefone: "123" });
+    expect(res.status).toBe(400);
   });
 
   test("PUT edita doador", async () => {

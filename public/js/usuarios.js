@@ -31,14 +31,31 @@ function popularTabela(usuarios) {
   corpo.innerHTML = "";
   usuarios.forEach((usuario) => {
     const tr = document.createElement("tr");
-    const acoes = podeGerenciarUsuarios
-      ? `<button onclick="editarUsuario(${usuario.id_usuario})">Editar</button>
-         <button onclick="excluirUsuario(${usuario.id_usuario})">Excluir</button>`
-      : "-";
+    const idUsuario = Number(usuario.id_usuario);
+    const estaAtivo = usuario.ativo !== false;
+    const ehPropriaConta = usuarioLogado && usuarioLogado.id === idUsuario;
+
+    let acoes = "-";
+    if (podeGerenciarUsuarios) {
+      const botoes = [
+        `<button type="button" data-acao="editar" data-id="${idUsuario}">Editar</button>`,
+        `<button type="button" data-acao="excluir" data-id="${idUsuario}">Excluir</button>`,
+      ];
+      if (!ehPropriaConta) {
+        botoes.push(
+          estaAtivo
+            ? `<button type="button" data-acao="desativar" data-id="${idUsuario}">Desativar</button>`
+            : `<button type="button" data-acao="ativar" data-id="${idUsuario}">Ativar</button>`,
+        );
+      }
+      acoes = botoes.join(" ");
+    }
+
     tr.innerHTML = `
-      <td>${usuario.nome}</td>
-      <td>${usuario.email}</td>
-      <td>${usuario.perfil}</td>
+      <td>${escaparHTML(usuario.nome)}</td>
+      <td>${escaparHTML(usuario.email)}</td>
+      <td>${escaparHTML(usuario.perfil)}</td>
+      <td>${estaAtivo ? "Ativo" : "Inativo"}</td>
       <td>${acoes}</td>`;
     corpo.appendChild(tr);
   });
@@ -54,9 +71,8 @@ function editarUsuario(id) {
   document.getElementById("senha").value = "";
   document.getElementById("confirmarSenha").value = "";
   document.getElementById("tituloFormulario").textContent = "Editar Usuário";
-  const botao = document.querySelector(".form-box button");
+  const botao = document.getElementById("botaoPrincipal");
   botao.textContent = "Salvar";
-  botao.setAttribute("onclick", "salvarUsuario()");
   document.getElementById("botaoCancelar").style.display = "inline-block";
 }
 
@@ -67,9 +83,8 @@ function cancelarEdicao() {
   document.getElementById("senha").value = "";
   document.getElementById("confirmarSenha").value = "";
   document.getElementById("tituloFormulario").textContent = "Novo Usuário";
-  const botao = document.querySelector(".form-box button");
+  const botao = document.getElementById("botaoPrincipal");
   botao.textContent = "Cadastrar";
-  botao.setAttribute("onclick", "cadastrarUsuario()");
   document.getElementById("botaoCancelar").style.display = "none";
 }
 
@@ -84,7 +99,7 @@ function validarFormularioUsuario(exigeSenha) {
   if (!validarEmail(email)) erros.push("Informe um e-mail válido");
   if (exigeSenha || senha) {
     if (!validarSenha(senha)) {
-      erros.push("A senha deve ter no mínimo 8 caracteres com pelo menos um número");
+      erros.push("A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula e número");
     } else if (!validarConfirmacao(senha, confirmarSenha)) {
       erros.push("As senhas não coincidem");
     }
@@ -187,3 +202,52 @@ async function cadastrarUsuario() {
     exibirModalErro("Erro ao cadastrar usuário.");
   }
 }
+
+async function alterarAtivo(id, ativo) {
+  const acao = ativo ? "ativar" : "desativar";
+  exibirModalConfirmacao(`Tem certeza que deseja ${acao} este usuário?`, async () => {
+    try {
+      const resposta = await fetch(`/usuarios/${id}/ativo`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${obterToken()}`,
+        },
+        body: JSON.stringify({ ativo }),
+      });
+
+      const dados = await resposta.json();
+
+      if (resposta.ok) {
+        exibirModalSucesso(dados.mensagem);
+        carregarUsuarios();
+      } else {
+        exibirModalErro(dados.mensagem);
+      }
+    } catch (erro) {
+      console.error(erro);
+      exibirModalErro("Erro ao alterar status do usuário.");
+    }
+  });
+}
+
+document.getElementById("botaoPrincipal").addEventListener("click", () => {
+  if (usuarioEditandoId) {
+    salvarUsuario();
+  } else {
+    cadastrarUsuario();
+  }
+});
+
+document.getElementById("botaoCancelar").addEventListener("click", cancelarEdicao);
+
+document.querySelector("table tbody").addEventListener("click", (evento) => {
+  const botao = evento.target.closest("button[data-acao]");
+  if (!botao) return;
+  const id = Number(botao.dataset.id);
+  const acao = botao.dataset.acao;
+  if (acao === "editar") editarUsuario(id);
+  else if (acao === "excluir") excluirUsuario(id);
+  else if (acao === "ativar") alterarAtivo(id, true);
+  else if (acao === "desativar") alterarAtivo(id, false);
+});

@@ -40,3 +40,5 @@ async function fazerLogin() {
     exibirModalErro("Erro ao fazer login. Tente novamente.");
   }
 }
+
+document.getElementById("botaoLogin").addEventListener("click", fazerLogin);
