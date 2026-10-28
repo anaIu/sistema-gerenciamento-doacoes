@@ -3,7 +3,40 @@ function exibirModalSucesso(mensagem) {
 }
 
 function exibirModalErro(mensagem) {
+  const texto = Array.isArray(mensagem) ? mensagem.join(" ") : String(mensagem || "");
+  const ehErroSessao =
+    texto.includes("Token inválido ou expirado") ||
+    texto.includes("Sessão encerrada") ||
+    texto.includes("Token não fornecido");
+
+  if (ehErroSessao && typeof tratarSessaoExpirada === "function") {
+    tratarSessaoExpirada(true);
+    return;
+  }
+
   criarModal({ titulo: "Erro", mensagem, classe: "erro", confirmaFecharFora: true });
+}
+
+function exibirModalSessaoExpirada(aoRedirecionar) {
+  const redirecionar = () => {
+    fecharModal();
+    if (typeof aoRedirecionar === "function") aoRedirecionar();
+    else window.location.href = "login.html";
+  };
+
+  criarModal({
+    titulo: "Sessão Expirada",
+    mensagem: "Sua sessão expirou. Você será redirecionado para a tela de login.",
+    classe: "erro",
+    botoes: [
+      {
+        texto: "Ir para o login",
+        classe: "modo-confirmar",
+        aoClicar: redirecionar,
+      },
+    ],
+    confirmaFecharFora: false,
+  });
 }
 
 function exibirModalConfirmacao(mensagem, aoConfirmar) {
