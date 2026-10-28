@@ -16,10 +16,64 @@ function obterUsuarioId() {
   return usuario.id;
 }
 
+let sessaoExpirando = false;
+let efetuandoLogout = false;
+
+function tokenExpirado(token) {
+  if (!token || typeof token !== "string") return true;
+  const partes = token.split(".");
+  if (partes.length !== 3) return false;
+  try {
+    const payloadBase64 = partes[1].replace(/-/g, "+").replace(/_/g, "/");
+    const jsonStr = decodeURIComponent(
+      atob(payloadBase64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    const payload = JSON.parse(jsonStr);
+    if (!payload.exp) return false;
+    return Date.now() >= payload.exp * 1000;
+  } catch (_) {
+    return false;
+  }
+}
+
+function tratarSessaoExpirada(mostrarModal = true) {
+  if (sessaoExpirando) return;
+  sessaoExpirando = true;
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("usuario");
+
+  const irParaLogin = () => {
+    window.location.href = "login.html";
+  };
+
+  if (mostrarModal && typeof exibirModalSessaoExpirada === "function") {
+    exibirModalSessaoExpirada(irParaLogin);
+    setTimeout(irParaLogin, 2500);
+  } else {
+    irParaLogin();
+  }
+}
+
+// Intercepta respostas 401 para encerrar sessão de forma segura e redirecionar
+if (typeof window !== "undefined" && window.fetch) {
+  const fetchOriginal = window.fetch;
+  window.fetch = async (...args) => {
+    const resposta = await fetchOriginal(...args);
+    if (resposta && resposta.status === 401 && !efetuandoLogout) {
+      tratarSessaoExpirada(true);
+    }
+    return resposta;
+  };
+}
+
 function verificarAutenticacao() {
   const token = obterToken();
-  if (!token) {
-    window.location.href = "login.html";
+  if (!token || tokenExpirado(token)) {
+    tratarSessaoExpirada(false);
     return;
   }
   injetarSidebar();
@@ -105,6 +159,7 @@ function injetarSidebar() {
 }
 
 async function fazerLogout() {
+  efetuandoLogout = true;
   const token = obterToken();
   if (token) {
     try {

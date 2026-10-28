@@ -87,4 +87,54 @@ test.describe("E2E de Segurança (S.5)", () => {
     // O doador da Org A NÃO deve aparecer na tabela da Org B
     await expect(page.locator(`text=${nomeDoadorOrgA}`)).not.toBeVisible();
   });
+
+  test("S.5.5: token expirado ao carregar página protegida limpa sessão e redireciona para login", async ({ page }) => {
+    // Monta um JWT estruturalmente válido mas com expiração no passado
+    const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+    const payloadPassado = Buffer.from(
+      JSON.stringify({ id: 1, perfil: "Administrador", id_organizacao: 1, exp: Math.floor(Date.now() / 1000) - 300 })
+    ).toString("base64url");
+    const tokenExpirado = `${header}.${payloadPassado}.assinatura_simulada`;
+
+    await page.goto("/login.html");
+    await page.evaluate((tok) => {
+      localStorage.setItem("token", tok);
+      localStorage.setItem("usuario", JSON.stringify({ id: 1, nome: "Teste" }));
+    }, tokenExpirado);
+
+    // Tenta acessar página protegida com o token vencido
+    await page.goto("/dashboard.html");
+
+    // Deve redirecionar para login e ter limpado o localStorage
+    await expect(page).toHaveURL(/login\.html/);
+    const tokenSalvo = await page.evaluate(() => localStorage.getItem("token"));
+    expect(tokenSalvo).toBeNull();
+  });
+
+  test("S.5.6: resposta 401 durante requisição exibe modal de Sessão Expirada e limpa credenciais", async ({ page }) => {
+    const org = await criarContaAtravesApi("sessao-exp");
+    await loginPelaInterface(page, org);
+    await page.goto("/usuarios.html");
+
+    // Simula token tornado inválido no localStorage durante o uso da tela
+    await page.evaluate(() => {
+      localStorage.setItem("token", "token-invalido-ou-expirado");
+    });
+
+    // Dispara ação que faz fetch autenticado
+    await page.fill("#nome", "Novo Usuario");
+    await page.fill("#email", "novo@test.local");
+    await page.fill("#senha", "SenhaForte123!");
+    await page.fill("#confirmarSenha", "SenhaForte123!");
+    await page.click("#botaoPrincipal");
+
+    // Deve exibir o modal específico de Sessão Expirada e redirecionar
+    await expect(page.locator(".modal-box.erro")).toBeVisible();
+    await expect(page.locator(".modal-box.erro")).toContainText("Sessão Expirada");
+
+    // Redireciona para o login e limpa o token
+    await expect(page).toHaveURL(/login\.html/, { timeout: 5000 });
+    const tokenSalvo = await page.evaluate(() => localStorage.getItem("token"));
+    expect(tokenSalvo).toBeNull();
+  });
 });
