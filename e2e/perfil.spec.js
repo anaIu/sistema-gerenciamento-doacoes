@@ -21,6 +21,9 @@ test("exibe dados e edita o perfil", async ({ page }) => {
   await page.fill("#telefone", "(41) 98888-0003");
   await page.click('button:has-text("Salvar")');
 
+  await expect(page.locator(".modal-box.confirmacao")).toBeVisible();
+  await page.locator(".modal-box.confirmacao button", { hasText: "Confirmar" }).click();
+
   await expect(page.locator(".modal-box.sucesso")).toBeVisible();
   await expect(page.locator("#infoNome")).toHaveText(nomeEditado);
 });

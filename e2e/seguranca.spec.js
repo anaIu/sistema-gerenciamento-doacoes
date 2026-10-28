@@ -33,12 +33,11 @@ test.describe("E2E de Segurança (S.5)", () => {
 
     await page.click('button:has-text("Criar conta")');
 
-    // Recebe confirmação simulada mas não loga no dashboard
+    // Recebe confirmação simulada e é redirecionado para login sem criar registro real
     await expect(page.locator(".modal-box.sucesso")).toBeVisible();
-    await expect(page.locator(".modal-box.sucesso")).toContainText("Operação registrada");
+    await expect(page).toHaveURL(/login\.html/, { timeout: 15000 });
 
     // Tentar logar com as credenciais do bot deve falhar (não foi salvo no banco)
-    await page.goto("/login.html");
     await page.fill("#email", emailBot);
     await page.fill("#senha", "SenhaForte123!");
     await page.click('button:has-text("Entrar")');
