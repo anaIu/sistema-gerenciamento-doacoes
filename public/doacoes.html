@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="pt-BR">
   <head>
@@ -12,22 +13,62 @@
 
         <div class="form-box">
           <h2 id="tituloFormulario">Nova Doação</h2>
-          <label for="idDoador">Doador</label>
-          <select id="idDoador">
-            <option value="">Selecione um doador</option>
-          </select>
+
+          <div id="campoDoador">
+            <label for="idDoador">Doador</label>
+            <select id="idDoador">
+              <option value="">Selecione um doador</option>
+            </select>
+          </div>
+
+          <label for="tipo">Tipo de doação</label>
           <select id="tipo">
-            <option>Alimento</option>
-            <option>Roupa</option>
-            <option>Dinheiro</option>
-            <option>Brinquedo</option>
-            <option>Outro</option>
+            <option value="Alimento">Alimento</option>
+            <option value="Roupa">Roupa</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Brinquedo">Brinquedo</option>
+            <option value="Outro">Outro</option>
           </select>
-          <input type="number" id="quantidade" placeholder="Quantidade" />
-          <input type="number" id="valor" placeholder="Valor" />
-          <textarea id="observacao" placeholder="Observação"></textarea>
-          <button id="botaoPrincipal" type="button">Registrar</button>
-          <button id="botaoCancelar" type="button" style="display:none;">Cancelar</button>
+
+          <div id="campoQuantidade">
+            <label for="quantidade">Quantidade de itens</label>
+            <input
+              type="number"
+              id="quantidade"
+              min="1"
+              step="1"
+              placeholder="Ex.: 10"
+            />
+          </div>
+
+          <div id="campoValor" style="display: none;">
+            <label for="valor">Valor da doação (R$)</label>
+            <input
+              type="number"
+              id="valor"
+              min="0.01"
+              step="0.01"
+              placeholder="Ex.: 50.00"
+            />
+          </div>
+
+          <label for="observacao">Observação (opcional)</label>
+          <textarea
+            id="observacao"
+            placeholder="Informações adicionais sobre a doação"
+          ></textarea>
+
+          <button id="botaoPrincipal" type="button">
+            Registrar
+          </button>
+
+          <button
+            id="botaoCancelar"
+            type="button"
+            style="display: none;"
+          >
+            Cancelar
+          </button>
         </div>
 
         <div class="table-box">
@@ -47,6 +88,7 @@
         </div>
       </main>
     </div>
+
     <script src="js/main.js"></script>
     <script src="js/validacoes.js"></script>
     <script src="js/modal.js"></script>
