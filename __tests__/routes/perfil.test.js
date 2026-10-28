@@ -66,7 +66,7 @@ describe("PUT /perfil", () => {
       id_usuario: 1,
       nome: "Admin Atualizado",
       email: "a@b.com",
-      cpf: "123.456.789-00",
+      cpf: "123.456.789-09",
       telefone: "(11) 99999-9999",
       perfil: "Administrador",
     });
@@ -74,13 +74,33 @@ describe("PUT /perfil", () => {
     const res = await request(app).put("/perfil").set(headersAuth()).send({
       nome: "Admin Atualizado",
       email: "a@b.com",
-      cpf: "123.456.789-00",
+      cpf: "123.456.789-09",
       telefone: "(11) 99999-9999",
     });
 
     expect(res.status).toBe(200);
     expect(res.body.usuario.nome).toBe("Admin Atualizado");
     expect(res.body.usuario.senha).toBeUndefined();
+  });
+
+  test("retorna 400 quando cpf tem formato invalido", async () => {
+    const res = await request(app).put("/perfil").set(headersAuth()).send({
+      nome: "Admin",
+      email: "a@b.com",
+      cpf: "111.111.111-11",
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.mensagem).toBe("CPF inválido");
+  });
+
+  test("retorna 400 quando telefone tem formato invalido", async () => {
+    const res = await request(app).put("/perfil").set(headersAuth()).send({
+      nome: "Admin",
+      email: "a@b.com",
+      telefone: "123",
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.mensagem).toBe("Telefone inválido");
   });
 
   test("retorna 400 quando email ja esta em uso por outro usuario", async () => {

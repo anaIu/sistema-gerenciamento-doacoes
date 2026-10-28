@@ -1,3 +1,8 @@
+require("dotenv").config({ quiet: true });
+
+const { validarConfiguracao } = require("./config/validar");
+validarConfiguracao();
+
 const app = require("./app");
 
 // Define a porta do servidor

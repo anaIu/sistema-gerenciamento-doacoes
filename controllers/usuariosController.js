@@ -1,6 +1,7 @@
 // Importa as funções do model de usuários
 const usuariosModel = require("../models/usuariosModel");
-const { validarEmail, validarSenha } = require("../utils/validacoes");
+const auditoriaModel = require("../models/auditoriaModel");
+const { validarEmail, validarSenhaForte } = require("../utils/validacoes");
 
 // Lista usuários conforme o escopo do usuário logado:
 // admin vê a própria organização; funcionário vê somente a própria conta
@@ -9,7 +10,7 @@ const listarUsuarios = async (req, res) => {
     const usuarios = await usuariosModel.listarUsuarios(req.usuario);
     res.status(200).json(usuarios);
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao listar usuários", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao listar usuários" });
   }
 };
 
@@ -27,8 +28,10 @@ const cadastrarUsuario = async (req, res) => {
       return res.status(400).json({ mensagem: "Formato de e-mail inválido" });
     }
 
-    if (!validarSenha(senha)) {
-      return res.status(400).json({ mensagem: "A senha deve ter pelo menos 8 caracteres" });
+    if (!validarSenhaForte(senha)) {
+      return res
+        .status(400)
+        .json({ mensagem: "A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula e número" });
     }
 
     const emailExistente = await usuariosModel.buscarPorEmailParaValidar(email, null);
@@ -44,12 +47,20 @@ const cadastrarUsuario = async (req, res) => {
       req.usuario.id_organizacao,
     );
 
+    await auditoriaModel.registrarLog({
+      id_usuario: req.usuario.id,
+      id_organizacao: req.usuario.id_organizacao,
+      acao: "USUARIO_CRIADO",
+      ip: req.ip,
+      detalhes: `Usuário ${novoUsuario.id_usuario} (${email})`,
+    });
+
     res.status(201).json({
       mensagem: "Usuário cadastrado com sucesso",
       usuario: novoUsuario,
     });
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao cadastrar usuário", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao cadastrar usuário" });
   }
 };
 
@@ -68,8 +79,10 @@ const editarUsuario = async (req, res) => {
       return res.status(400).json({ mensagem: "Formato de e-mail inválido" });
     }
 
-    if (senha && !validarSenha(senha)) {
-      return res.status(400).json({ mensagem: "A senha deve ter pelo menos 8 caracteres" });
+    if (senha && !validarSenhaForte(senha)) {
+      return res
+        .status(400)
+        .json({ mensagem: "A senha deve ter ao menos 8 caracteres, com maiúscula, minúscula e número" });
     }
 
     const emailExistente = await usuariosModel.buscarPorEmailParaValidar(email, id);
@@ -82,9 +95,17 @@ const editarUsuario = async (req, res) => {
       return res.status(404).json({ mensagem: "Usuário não encontrado" });
     }
 
+    await auditoriaModel.registrarLog({
+      id_usuario: req.usuario.id,
+      id_organizacao: req.usuario.id_organizacao,
+      acao: "USUARIO_EDITADO",
+      ip: req.ip,
+      detalhes: `Usuário ${usuario.id_usuario}`,
+    });
+
     res.status(200).json({ mensagem: "Usuário editado com sucesso", usuario });
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao editar usuário", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao editar usuário" });
   }
 };
 
@@ -102,6 +123,15 @@ const excluirUsuario = async (req, res) => {
       if (!usuario) {
         return res.status(404).json({ mensagem: "Usuário não encontrado" });
       }
+
+      await auditoriaModel.registrarLog({
+        id_usuario: req.usuario.id,
+        id_organizacao: req.usuario.id_organizacao,
+        acao: "USUARIO_EXCLUIDO",
+        ip: req.ip,
+        detalhes: `Usuário ${usuario.id_usuario}`,
+      });
+
       res.status(200).json({ mensagem: "Usuário excluído com sucesso" });
     } catch (error) {
       if (error.code === "23503") {
@@ -110,7 +140,43 @@ const excluirUsuario = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    res.status(500).json({ mensagem: "Erro ao excluir usuário", erro: error.message });
+    res.status(500).json({ mensagem: "Erro ao excluir usuário" });
+  }
+};
+
+// Ativa/desativa um usuário da própria organização (apenas administradores)
+const alterarAtivo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ativo } = req.body;
+
+    if (typeof ativo !== "boolean") {
+      return res.status(400).json({ mensagem: "O campo 'ativo' deve ser booleano" });
+    }
+
+    if (Number(id) === req.usuario.id && ativo === false) {
+      return res.status(400).json({ mensagem: "Não é possível desativar a própria conta" });
+    }
+
+    const usuario = await usuariosModel.alterarAtivo(id, ativo, req.usuario.id_organizacao);
+    if (!usuario) {
+      return res.status(404).json({ mensagem: "Usuário não encontrado" });
+    }
+
+    await auditoriaModel.registrarLog({
+      id_usuario: req.usuario.id,
+      id_organizacao: req.usuario.id_organizacao,
+      acao: ativo ? "USUARIO_ATIVADO" : "USUARIO_DESATIVADO",
+      ip: req.ip,
+      detalhes: `Usuário ${usuario.id_usuario}`,
+    });
+
+    res.status(200).json({
+      mensagem: ativo ? "Usuário ativado com sucesso" : "Usuário desativado com sucesso",
+      usuario,
+    });
+  } catch (error) {
+    res.status(500).json({ mensagem: "Erro ao alterar status do usuário" });
   }
 };
 
@@ -118,5 +184,6 @@ module.exports = {
   listarUsuarios,
   cadastrarUsuario,
   editarUsuario,
-  excluirUsuario
+  excluirUsuario,
+  alterarAtivo,
 };

@@ -1,3 +1,5 @@
+const obterDigitos = (valor) => (valor || "").toString().replace(/\D/g, "");
+
 const validarEmail = (email) => {
   if (typeof email !== "string") return false;
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,4 +15,71 @@ const validarConfirmacao = (senha, confirmarSenha) => {
   return senha === confirmarSenha;
 };
 
-module.exports = { validarEmail, validarSenha, validarConfirmacao };
+const validarTelefone = (telefone) => {
+  const digitos = obterDigitos(telefone);
+  return digitos.length === 10 || digitos.length === 11;
+};
+
+const validarCPF = (cpf) => {
+  const digitos = obterDigitos(cpf);
+  if (digitos.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(digitos)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) soma += Number(digitos.charAt(i)) * (10 - i);
+  let resto = (soma * 10) % 11;
+  if (resto === 10) resto = 0;
+  if (resto !== Number(digitos.charAt(9))) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) soma += Number(digitos.charAt(i)) * (11 - i);
+  resto = (soma * 10) % 11;
+  if (resto === 10) resto = 0;
+  return resto === Number(digitos.charAt(10));
+};
+
+const validarCNPJ = (cnpj) => {
+  const digitos = obterDigitos(cnpj);
+  if (digitos.length !== 14) return false;
+  if (/^(\d)\1{13}$/.test(digitos)) return false;
+
+  const calcularDigito = (pesos) => {
+    let soma = 0;
+    for (let i = 0; i < pesos.length; i++) soma += Number(digitos.charAt(i)) * pesos[i];
+    const resto = soma % 11;
+    return resto < 2 ? 0 : 11 - resto;
+  };
+
+  const primeiro = calcularDigito([5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  if (primeiro !== Number(digitos.charAt(12))) return false;
+
+  const segundo = calcularDigito([6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  return segundo === Number(digitos.charAt(13));
+};
+
+const escaparHTML = (texto) => {
+  if (texto === null || texto === undefined) return "";
+  return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+const validarSenhaForte = (senha) => {
+  if (typeof senha !== "string") return false;
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(senha);
+};
+
+module.exports = {
+  obterDigitos,
+  validarEmail,
+  validarSenha,
+  validarSenhaForte,
+  validarConfirmacao,
+  validarTelefone,
+  validarCPF,
+  validarCNPJ,
+  escaparHTML,
+};

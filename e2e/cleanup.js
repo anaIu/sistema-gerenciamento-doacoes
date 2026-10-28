@@ -16,12 +16,23 @@ async function limparDadosE2E() {
       "SELECT id_usuario FROM usuarios WHERE email LIKE 'e2e.%@test.local'";
 
     const total = {
+      logs: 0,
       movimentacoes: 0,
       doacoes: 0,
       doadores: 0,
       usuarios: 0,
       organizacoes: 0,
     };
+
+    const qOrganizacoesE2E =
+      "SELECT id_organizacao FROM organizacoes WHERE nome LIKE 'E2E %' OR nome LIKE 'Org E2E %'";
+
+    const resLogs = await client.query(
+      `DELETE FROM logs_auditoria
+       WHERE id_usuario IN (${qUsuariosE2E})
+          OR id_organizacao IN (${qOrganizacoesE2E})`,
+    );
+    total.logs = resLogs.rowCount;
 
     const resMov = await client.query(
       `DELETE FROM movimentacoes_estoque

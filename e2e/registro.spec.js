@@ -1,14 +1,15 @@
 const { test, expect } = require("@playwright/test");
 const { gerarCPF, gerarCNPJ, gerarEmail } = require("./utils");
 
-test("registra conta e redireciona para o dashboard", async ({ page }) => {
+test("registra conta e redireciona para o login", async ({ page }) => {
   await page.goto("/criar-conta.html");
 
   const sufixo = Date.now();
+  const email = gerarEmail("registro");
   await page.fill("#nomeOrganizacao", `Org E2E ${sufixo}`);
   await page.fill("#cnpj", gerarCNPJ());
   await page.fill("#nome", `Usuário ${sufixo}`);
-  await page.fill("#email", gerarEmail("registro"));
+  await page.fill("#email", email);
   await page.fill("#cpf", gerarCPF());
   await page.fill("#telefone", "(41) 98765-0001");
   await page.fill("#senha", "SenhaForte123!");
@@ -17,7 +18,13 @@ test("registra conta e redireciona para o dashboard", async ({ page }) => {
   await page.click('button:has-text("Criar conta")');
 
   await expect(page.locator(".modal-box.sucesso")).toBeVisible();
-  await expect(page).toHaveURL(/dashboard\.html/, { timeout: 15000 });
+  await expect(page).toHaveURL(/login\.html/, { timeout: 15000 });
+
+  await page.fill("#email", email);
+  await page.fill("#senha", "SenhaForte123!");
+  await page.click('button:has-text("Entrar")');
+
+  await expect(page).toHaveURL(/dashboard\.html/);
   await expect(page.locator("#sidebar")).toBeVisible();
 });
 
